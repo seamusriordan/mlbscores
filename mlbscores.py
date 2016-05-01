@@ -64,7 +64,8 @@ def printdetails(game):
     for i in range(ninn - len(linescore["inning"])):
         sys.stdout.write("   ")
     sys.stdout.write("| %2d %2d %2d %2d\n" % \
-      (int(linescore["h"]["away"]), int(linescore["r"]["away"]), int(linescore["e"]["away"]), int(linescore["so"]["away"]))  )
+      (int(linescore["h"]["away"]), int(linescore["r"]["away"]), \
+        int(linescore["e"]["away"]), int(linescore["so"]["home"]))  )
     
     sys.stdout.write("%-4s" % game["home_name_abbrev"])
     for i in range(len(linescore["inning"])):
@@ -75,7 +76,8 @@ def printdetails(game):
     for i in range(ninn - len(linescore["inning"])):
         sys.stdout.write("   ")
     sys.stdout.write("| %2d %2d %2d %2d\n" % \
-      (int(linescore["h"]["home"]), int(linescore["r"]["home"]), int(linescore["e"]["home"]), int(linescore["so"]["home"]))  )
+      (int(linescore["h"]["home"]), int(linescore["r"]["home"]), \
+        int(linescore["e"]["home"]), int(linescore["so"]["away"]))  )
 
 
 def printboxscore(game):
@@ -166,7 +168,6 @@ if now.hour < 10:
     #  If before 10AM, use yesterday
     now = now - datetime.timedelta(1)
 if args.t:
-    #  If before 10AM, use yesterday
     now = now + args.t*datetime.timedelta(1)
     
 explicitteams = False
