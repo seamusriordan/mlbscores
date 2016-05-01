@@ -151,6 +151,36 @@ def printboxscore(game):
             int(sums["hr"])))
 #    sys.stdout.write("\n")
 
+def print_standings():
+    now = datetime.datetime.now()
+
+    standings_uri = "http://mlb.com/lookup/json/named.standings_schedule_date.bam?season=" \
+        + str(now.year) + "&schedule_game_date.game_date='" + now.strftime("%y%m%d" ) + "'&sit_code='h0'&league_id=103&league_id=104&all_star_sw='N'&version=2"
+        
+    standingsjson = urllib2.urlopen(standings_uri)
+    standings = json.loads(standingsjson.read())["standings_schedule_date"]["standings_all_date_rptr"]["standings_all_date"]
+
+    orderedkeys = []
+    divdict = {}
+
+    for league in standings:
+        for team in league["queryResults"]["row"]:
+            try:
+                divdict[team['division']].append(team)
+            except:
+                orderedkeys.append( team['division'] )
+                divdict[team['division']] = [team]
+
+    for div in orderedkeys:
+        sys.stdout.write("%-24s    W    L       %%   GB  L10 Strk\n" % div)
+        for team in divdict[div]:
+            sys.stdout.write("%-24s %4d %4d   %5.3f %4s %4s %4s\n" \
+                % (team['team_full'], int(team['w']), int(team['l']), float(team['pct']), \
+                    team['gb'], team['last_ten'], team['streak'] ))
+
+        sys.stdout.write("\n")
+    sys.stdout.write("\n")
+
 ###########################
 
 argparser = argparse.ArgumentParser(description="MLB scores utility")
@@ -159,8 +189,13 @@ argparser.add_argument("-t", action="store_const", dest="t", const=1, help="Show
 argparser.add_argument("-tt", action="store_const", dest="t", const=2, help="Show for two days from now")
 argparser.add_argument("-b", action="store_true", dest="boxscore", help="Show boxscore output for best games")
 argparser.add_argument("-f", action="store_true", dest="full", help="Show full output for all games")
+argparser.add_argument("-s", action="store_true", dest="standings", help="Show current standings")
 argparser.add_argument("teams", help="Explicit teams only", nargs="*")
 args = argparser.parse_args()
+
+if args.standings:
+    print_standings()
+    exit(0)
 
 # Identify date
 now = datetime.datetime.now()
