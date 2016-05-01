@@ -163,6 +163,7 @@ def print_standings():
     orderedkeys = []
     divdict = {}
 
+    sys.stdout.write("\n")
     for league in standings:
         for team in league["queryResults"]["row"]:
             try:
