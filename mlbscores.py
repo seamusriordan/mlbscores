@@ -24,14 +24,14 @@ def printgame(game):
 
     else: 
         if not status == "In Progress":
-            sys.stdout.write( "%-8s" %( status ))
+            sys.stdout.write( "%-9s" %( status ))
         else:
             innpart = "Mid"
             if game["status"]["inning"] == "Y":
                 innpart = "Top" 
             else: 
                 innpart = "Bot"
-            sys.stdout.write( "%3s %-4s" %( innpart, game["status"]["inning"]   ))
+            sys.stdout.write( "%3s %-5s" %( innpart, game["status"]["inning"]   ))
         
         if status == "Postponed":
             sys.stdout.write( "  (%s)" %(game["status"]["reason"] ))
@@ -39,7 +39,7 @@ def printgame(game):
         if "linescore" in game:
             hscore = int( game["linescore"]["r"]["home"] )
             ascore = int( game["linescore"]["r"]["away"] )
-            sys.stdout.write("   %d-%d" %( ascore, hscore ))
+            sys.stdout.write("  %2d-%-2d" %( ascore, hscore ))
             
 def printdetails(game):
     ninn = max(9, len(game["linescore"]["inning"]))
@@ -52,7 +52,7 @@ def printdetails(game):
     # Format header
     sys.stdout.write("    ")
     for i in range(ninn):
-        sys.stdout.write(" %d " % (i+1))
+        sys.stdout.write("%2d " % (i+1))
     sys.stdout.write("|  H  R  E SO\n")
     
     sys.stdout.write("%-4s" % game["away_name_abbrev"])
