@@ -217,12 +217,13 @@ def print_standings():
 ###########################
 # Main code
 
-if __name__ == "__main__":
+def main(argv):
+    global bestteams
     argparser = argparse.ArgumentParser(description="MLB scores utility")
 
     #FIXME make the first three mutually exclusive
     #FIXME add in option for arbitrary day offset and specific dates?
-    argparser.add_argument("-y", action="store_const", dest="dayoffet", const=-1, help="Show for yesterday")
+    argparser.add_argument("-y", action="store_const", dest="dayoffset", const=-1, help="Show for yesterday")
     argparser.add_argument("-t", action="store_const", dest="dayoffset", const=1, help="Show for tomorrow")
     argparser.add_argument("-tt", action="store_const", dest="dayoffset", const=2, help="Show for two days from now")
     argparser.add_argument("-b", action="store_true", dest="boxscore", help="Show boxscore output for best games")
@@ -230,7 +231,7 @@ if __name__ == "__main__":
     argparser.add_argument("-s", action="store_true", dest="standings", help="Show current standings")
     argparser.add_argument("teams", help="Show explicit teams only specified by space separated list of case insensitive abbreviated names  e.g. chc coL SF", nargs="*")
     args = argparser.parse_args()
-
+    
     if args.standings:
         print_standings()
         exit(0)
@@ -253,10 +254,10 @@ if __name__ == "__main__":
     # Form JSON URL and load
     scoreboard_url = base_scoreboard_url % (now.year, now.month, now.day)
     scoreboardjson = urllib2.urlopen(scoreboard_url)
-    gamejson = json.loads(scoreboardjson.read())["data"]["games"]
+    gamejson       = json.loads(scoreboardjson.read())["data"]["games"]
 
     # Presort games
-    bestgames = []
+    bestgames      = []
     remaininggames = []
 
     for game in gamejson["game"]:
@@ -287,3 +288,5 @@ if __name__ == "__main__":
                     printboxscore(game)
             sys.stdout.write("\n")
         
+if __name__ == "__main__":
+    main(sys.argv)
