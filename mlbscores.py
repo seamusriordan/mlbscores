@@ -157,6 +157,7 @@ argparser.add_argument("-t", action="store_const", dest="t", const=1, help="Show
 argparser.add_argument("-tt", action="store_const", dest="t", const=2, help="Show for two days from now")
 argparser.add_argument("-b", action="store_true", dest="boxscore", help="Show boxscore output for best games")
 argparser.add_argument("-f", action="store_true", dest="full", help="Show full output for all games")
+argparser.add_argument("teams", help="Explicit teams only", nargs="*")
 args = argparser.parse_args()
 
 # Identify date
@@ -167,6 +168,11 @@ if now.hour < 10:
 if args.t:
     #  If before 10AM, use yesterday
     now = now + args.t*datetime.timedelta(1)
+    
+explicitteams = False
+if len(args.teams) > 0:
+    explicitteams = True
+    bestteams = [x.upper() for x in args.teams]
 
 # Form JSON URL and load
 mlb_scoreboard_url = \
@@ -200,12 +206,13 @@ for game in bestgames:
             printboxscore(game)
     sys.stdout.write("\n")
 
-for game in remaininggames:
-    printgame(game)
-    if args.full and "linescore" in game:
+if not explicitteams:
+    for game in remaininggames:
+        printgame(game)
+        if args.full and "linescore" in game:
+            sys.stdout.write("\n")
+            printdetails(game)
+            if args.boxscore:
+                printboxscore(game)
         sys.stdout.write("\n")
-        printdetails(game)
-        if args.boxscore:
-            printboxscore(game)
-    sys.stdout.write("\n")
     
