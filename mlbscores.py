@@ -126,28 +126,28 @@ def printboxscore(game):
         if not isinstance(batters["batter"], list):
             batters["batter"] = [batters["batter"]]
 
-        sys.stdout.write("%-20s   H  BB   R  HR  SO    OBP    OPS\n" %
+        sys.stdout.write("%-20s  PA   H  BB   R  HR  SO    OBP    OPS\n" %
                          
                          game[batters["team_flag"]+"_team_name"]  )
                           
         # batter variables we want to sum
-        keystosum = ["h", "bb", "r", "hr", "so"]
+        keystosum = ["ab", "h", "bb", "r", "hr", "so"]
         sums = {}
         for k in keystosum: 
             sums[k] = 0
 
         for p in batters["batter"]:
             try:
-                sys.stdout.write("%-20s %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (p["name_display_first_last"], \
-                     int(p["h"]), int(p["bb"]), int(p["r"]),\
+                sys.stdout.write("%-20s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (p["name_display_first_last"], \
+                     int(p["ab"]) + int(p["bb"]), int(p["h"]), int(p["bb"]), int(p["r"]),\
                     int(p["hr"]), int(p["so"]), float(p['obp']), float(p['obp']) + float(p['slg'])))
             except Exception as e:
                 print e
 
             for k in sums.keys():
                 sums[k] += float(p[k])
-        sys.stdout.write("%-20s %3d %3d %3d %3d %3d\n\n" % ("TOTAL", \
-            int(sums["h"]), int(sums["bb"]), int(sums["r"]),\
+        sys.stdout.write("%-20s %3d %3d %3d %3d %3d %3d\n\n" % ("TOTAL", \
+            int(sums["ab"]) + int(sums["bb"]), int(sums["h"]), int(sums["bb"]), int(sums["r"]),\
             int(sums["hr"]), int(sums["so"]) ))
 
     
