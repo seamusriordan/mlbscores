@@ -234,7 +234,7 @@ def main(argv):
     
     if args.standings:
         print_standings()
-        exit(0)
+        return
 
     # Identify date
     now = datetime.datetime.now()
