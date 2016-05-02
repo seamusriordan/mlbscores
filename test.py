@@ -22,7 +22,7 @@ def check_urls():
 
 def test_functionality():
     # Basic functionality tests
-    # General idea is these all should a) and b) produce different output
+    # General idea is these all should a) run without failure and b) produce different output
 
     argstocheck = [ [""], ["-t"], ["-y"], ["-b"], ["-s"], ["-tt"] ]
 
