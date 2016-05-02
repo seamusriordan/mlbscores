@@ -126,7 +126,7 @@ def printboxscore(game):
         if not isinstance(batters["batter"], list):
             batters["batter"] = [batters["batter"]]
 
-        sys.stdout.write("%-20s  PA   H  BB   R  HR  SO    OBP    OPS\n" %
+        sys.stdout.write("   %-20s  PA   H  BB   R  HR  SO    OBP    OPS\n" %
                          
                          game[batters["team_flag"]+"_team_name"]  )
                           
@@ -138,15 +138,16 @@ def printboxscore(game):
 
         for p in batters["batter"]:
             try:
-                sys.stdout.write("%-20s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (p["name_display_first_last"], \
-                     int(p["ab"]) + int(p["bb"]), int(p["h"]), int(p["bb"]), int(p["r"]),\
-                    int(p["hr"]), int(p["so"]), float(p['obp']), float(p['obp']) + float(p['slg'])))
+                sys.stdout.write("%2s %-20s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (
+                    p["pos"], p["name_display_first_last"], \
+                    int(p["ab"]) + int(p["bb"]), int(p["h"]), int(p["bb"]), int(p["r"]),\
+                    int(p["hr"]), int(p["so"]), float(p['obp']), float(p['obp']) + float(p['slg'])) )
             except Exception as e:
                 print e
 
             for k in sums.keys():
                 sums[k] += float(p[k])
-        sys.stdout.write("%-20s %3d %3d %3d %3d %3d %3d\n\n" % ("TOTAL", \
+        sys.stdout.write("   %-20s %3d %3d %3d %3d %3d %3d\n\n" % ("TOTAL", \
             int(sums["ab"]) + int(sums["bb"]), int(sums["h"]), int(sums["bb"]), int(sums["r"]),\
             int(sums["hr"]), int(sums["so"]) ))
 
@@ -159,7 +160,7 @@ def printboxscore(game):
         if not isinstance(pitchers["pitcher"], list):
             pitchers["pitcher"] = [pitchers["pitcher"]]
 
-        sys.stdout.write("%-20s   IP  NP SO  H BB  R HR   ERA\n" %
+        sys.stdout.write("   %-20s   IP  PC SO  H BB  R HR   ERA\n" %
                          
                          game[pitchers["team_flag"]+"_team_name"]  )
                           
@@ -171,7 +172,7 @@ def printboxscore(game):
 
         for p in pitchers["pitcher"]:
             try:
-                sys.stdout.write("%-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n" % \
+                sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n" % \
                     (p["name_display_first_last"],  float(p["out"])/3, int(p["np"]), \
                       int(p["so"]), int(p["h"]), int(p["bb"]), int(p["r"]), int(p["hr"]), float(p["era"] )))
             except Exception as e:
@@ -179,7 +180,7 @@ def printboxscore(game):
 
             for k in sums.keys():
                 sums[k] += float(p[k])
-        sys.stdout.write("%-20s %4.1f %3d %2d %2d %2d %2d %2d\n\n" % ("TOTAL", \
+        sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d\n\n" % ("TOTAL", \
             float(sums["out"])/3, int(sums["np"]), int(sums["so"]), int(sums["h"]), \
             int(sums["bb"]), int(sums["r"]), int(sums["hr"])))
 
