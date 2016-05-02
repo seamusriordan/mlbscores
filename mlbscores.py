@@ -15,6 +15,7 @@ import json
 import urllib2
 import datetime
 import sys
+import time
 import argparse
 
 # FIXME - read in from file
@@ -25,7 +26,13 @@ daytime_rollover = 10
 base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
 base_boxscore_url   = "http://gd2.mlb.com/%s/boxscore.json"
 base_standings_uri  = "http://mlb.com/lookup/json/named.standings_schedule_date.bam?season=%4s&schedule_game_date.game_date='%8s'&sit_code='h0'&league_id=103&league_id=104&all_star_sw='N'&version=2"
+max_uri_retry = 5    # standings URI sometimes doesn't respond
+wait_until_retry = 5 # number of seconds to wait until retrying standings after failure
 
+
+class URIException( BaseException ):
+    def __init__(self, value):
+        self.value = value
 
 def printgame(game):
     # Print out basic game status and score, or 
@@ -113,6 +120,8 @@ def printdetails(game):
 def printboxscore(game):
     # Print reduced box score data for all batters and pitchers
     boxscore_url = base_boxscore_url % game["game_data_directory"] 
+    print game["game_data_directory"]
+    exit(1)
     sys.stdout.write("\n")
 
     boxjsondata = urllib2.urlopen(boxscore_url)
@@ -184,14 +193,32 @@ def printboxscore(game):
             float(sums["out"])/3, int(sums["np"]), int(sums["so"]), int(sums["h"]), \
             int(sums["bb"]), int(sums["r"]), int(sums["hr"])))
 
+def load_standings(uri):
+    standingsjson = urllib2.urlopen(uri)
+    standings = json.loads(standingsjson.read())["standings_schedule_date"]["standings_all_date_rptr"]["standings_all_date"]
+    return standings
+
+
 def print_standings():
     # Print standings
     now = datetime.datetime.now()
 
     standings_uri = base_standings_uri % (now.strftime("%Y"), now.strftime("%Y%m%d"))
     
-    standingsjson = urllib2.urlopen(standings_uri)
-    standings = json.loads(standingsjson.read())["standings_schedule_date"]["standings_all_date_rptr"]["standings_all_date"]
+    loaded_standings = False
+    nretry = 0
+    while not loaded_standings and nretry < max_uri_retry:
+        try :
+            standings = load_standings(standings_uri)
+            loaded_standings = True
+        except ValueError:
+            nretry += 1
+            sys.stderr.write("Standings JSON data not returned... retry %d\n" % nretry)
+            time.sleep(wait_until_retry)
+
+    if not loaded_standings:
+        sys.stderr.write("Cannot load JSON standing data after %d retries\n" % max_uri_retry)
+        raise URIException("Cannot load JSON standing data after %d retries" % max_uri_retry)
 
     orderedkeys = []
     divdict = {}
