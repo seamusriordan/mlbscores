@@ -120,7 +120,6 @@ def printdetails(game):
 def printboxscore(game):
     # Print reduced box score data for all batters and pitchers
     boxscore_url = base_boxscore_url % game["game_data_directory"] 
-    print game["game_data_directory"]
 
     boxjsondata = urllib2.urlopen(boxscore_url)
     boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
