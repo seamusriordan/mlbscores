@@ -144,8 +144,8 @@ def printboxscore(game):
 
         for p in batters["batter"]:
             try:
-                sys.stdout.write("%2s %-20s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (
-                    p["pos"], p["name_display_first_last"], \
+                sys.stdout.write("%-23s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (
+                    "%2s %s" % (p["pos"], p["name_display_first_last"] ), \
                     int(p["ab"]) + int(p["bb"]) + int(p["hbp"]) + int(p["sac"]), int(p["h"]), int(p["bb"]), int(p["r"]),\
                     int(p["hr"]), int(p["so"]), float(p['obp']), float(p['obp']) + float(p['slg'])) )
             except Exception as e:
@@ -301,6 +301,7 @@ def main(argv):
         if "linescore" in game:
             printdetails(game)
             if args.boxscore:
+                sys.stdout.write("\n")
                 printboxscore(game)
         sys.stdout.write("\n")
 
