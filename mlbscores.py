@@ -210,7 +210,8 @@ def print_standings():
             loaded_standings = True
         except ValueError:
             nretry += 1
-            sys.stderr.write("Standings JSON data not returned... retry %d\n" % nretry)
+            if nretry > 1:
+                sys.stderr.write("Standings JSON data not returned... retry %d\n" % nretry)
             time.sleep(wait_until_retry)
 
     if not loaded_standings:
