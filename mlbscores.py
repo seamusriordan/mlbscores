@@ -128,7 +128,7 @@ def printboxscore(game):
     #  Print batting stats
     for batters in boxscore["batting"]:
 
-        #  Ugh.  Recast as list if there's only one batterr
+        #  Ugh.  Recast as list if there's only one batter
         if not isinstance(batters["batter"], list):
             batters["batter"] = [batters["batter"]]
 
@@ -291,8 +291,14 @@ def main(argv):
         sys.stdout.write("No games scheduled for " + now.strftime("%A %B %d, %Y") + "\n\n")
         return
 
+    games = gamejson['game']
 
-    for game in gamejson["game"]:
+# If there's a single game JSON just has it as a key rather than
+# an array.  We recast it like such so we can process it as normal
+    if 'id' in games:
+        games = [games]
+
+    for game in games:
         if any( game["away_name_abbrev"] == s for s in bestteams ) or \
             any( game["home_name_abbrev"] == s for s in bestteams ):
             bestgames.append(game)
