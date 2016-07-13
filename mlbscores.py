@@ -286,6 +286,11 @@ def main(argv):
     # Presort games
     bestgames      = []
     remaininggames = []
+    
+    if not "game" in gamejson:
+        sys.stdout.write("No games scheduled for " + now.strftime("%A %B %d, %Y") + "\n\n")
+        return
+
 
     for game in gamejson["game"]:
         if any( game["away_name_abbrev"] == s for s in bestteams ) or \
