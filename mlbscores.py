@@ -291,12 +291,20 @@ def main(argv):
         sys.stdout.write("No games scheduled for " + now.strftime("%A %B %d, %Y") + "\n\n")
         return
 
-    games = gamejson['game']
+    readgames = gamejson['game']
 
 # If there's a single game JSON just has it as a key rather than
 # an array.  We recast it like such so we can process it as normal
-    if 'id' in games:
-        games = [games]
+    if 'id' in readgames:
+        readgames = [readgames]
+
+    games = []
+        
+    # Filter by date
+    thisdate = now.strftime("%Y/%m/%d")
+    for game in readgames:
+        if game['original_date'] == thisdate:
+            games.append(game)
 
     for game in games:
         if any( game["away_name_abbrev"] == s for s in bestteams ) or \
