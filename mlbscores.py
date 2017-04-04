@@ -23,6 +23,9 @@ bestteams = ["CHC"]
 # Switch from previous scores to today's scores at 10AM
 daytime_rollover = 10 
 
+timezone = "CT"
+timeshift = { "ET" : 0, "CT" : 1, "MT": 2, "PT" : 3}
+
 base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
 base_boxscore_url   = "http://gd2.mlb.com/%s/boxscore.json"
 base_standings_uri  = "http://mlb.com/lookup/json/named.standings_schedule_date.bam?season=%4s&schedule_game_date.game_date='%8s'&sit_code='h0'&league_id=103&league_id=104&all_star_sw='N'&version=2"
@@ -40,9 +43,14 @@ def printgame(game):
     sys.stdout.write("%-3s @ %-3s   " % (game["away_name_abbrev"], game["home_name_abbrev"]))
     
     status = game["status"]["status"]
+
+    [time_h, time_m] = [ int(x) for x in game["time"].split(":")]
+    time_h -= timeshift[timezone]
+    game["time"] = "%2d:%02d" % (time_h, time_m)
+    game["time_zone"] = timezone
     
     if status == "Preview":
-        # FIXME:  Add timezone support
+        # FIXME:  Add real timezone support
         sys.stdout.write("  %6s %s " % (game["time"], game["time_zone"]))
         homep = game["home_probable_pitcher"]
         awayp = game["away_probable_pitcher"]
