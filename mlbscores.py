@@ -46,6 +46,9 @@ def printgame(game):
 
     [time_h, time_m] = [ int(x) for x in game["time"].split(":")]
     time_h -= timeshift[timezone]
+    if time_h < 1:
+        time_h += 12
+
     game["time"] = "%2d:%02d" % (time_h, time_m)
     game["time_zone"] = timezone
     
