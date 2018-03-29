@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 # mlb scores and standing utility
 #
@@ -160,7 +160,7 @@ def printboxscore(game):
                     int(p["ab"]) + int(p["bb"]) + int(p["hbp"]) + int(p["sac"]), int(p["h"]), int(p["bb"]), int(p["r"]),\
                     int(p["hr"]), int(p["so"]), float(p['obp']), float(p['obp']) + float(p['slg'])) )
             except Exception as e:
-                print e
+                print(e)
 
             for k in sums.keys():
                 sums[k] += float(p[k])
@@ -193,7 +193,7 @@ def printboxscore(game):
                     (p["name_display_first_last"],  float(p["out"])/3, int(p["np"]), \
                       int(p["so"]), int(p["h"]), int(p["bb"]), int(p["r"]), int(p["hr"]), float(p["era"] )))
             except Exception as e:
-                print e
+                print(e)
 
             for k in sums.keys():
                 sums[k] += float(p[k])
