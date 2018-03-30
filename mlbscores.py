@@ -139,7 +139,7 @@ def printboxscore(game):
     for team in boxscore["teams"]:
         #  Print batting stats
         sys.stdout.write("   %-20s  PA   H  BB   R  HR  SO    OBP    OPS\n" %
-                         boxscore["teams"][team]["team"]["abbreviation"] )
+                         boxscore["teams"][team]["team"]["name"] )
                           
         # batter variables we want to sum
         keystosum = ["atBats", "hits", "baseOnBalls", "runs", "homeRuns", "strikeOuts", "hitByPitch", "sacFlies", "sacBunts"]
@@ -175,7 +175,7 @@ def printboxscore(game):
     for team in boxscore["teams"]:
 
         sys.stdout.write("   %-20s   IP  PC SO  H BB  R HR   ERA\n" %
-                          boxscore["teams"][team]["team"]["abbreviation"] )                
+                          boxscore["teams"][team]["team"]["name"] )                
                           
         keystosum = ["outs", "inningsPitched", "strikeOuts", "hits", "baseOnBalls", "runs", "homeRuns"]
         # pitcher variables we want to sum
