@@ -27,7 +27,7 @@ timezone = "CT"
 timeshift = { "ET" : 0, "CT" : 1, "MT": 2, "PT" : 3}
 
 base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
-base_boxscore_url   = "http://gd2.mlb.com/%s/boxscore.json"
+base_boxscore_url   = "https://statsapi.mlb.com/api/v1/game/%s/boxscore"
 base_standings_uri  = "http://mlb.com/lookup/json/named.standings_schedule_date.bam?season=%4s&schedule_game_date.game_date='%8s'&sit_code='h0'&league_id=103&league_id=104&all_star_sw='N'&version=2"
 max_uri_retry = 5    # standings URI sometimes doesn't respond
 wait_until_retry = 5 # number of seconds to wait until retrying standings after failure
@@ -130,76 +130,79 @@ def printdetails(game):
 
 def printboxscore(game):
     # Print reduced box score data for all batters and pitchers
-    boxscore_url = base_boxscore_url % game["game_data_directory"] 
+    boxscore_url = base_boxscore_url % game["game_pk"] 
 
     boxjsondata = urllib2.urlopen(boxscore_url)
-    boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
+    #boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
+    boxscore= json.loads(boxjsondata.read())
 
-
-    #  Print batting stats
-    for batters in boxscore["batting"]:
-
-        #  Ugh.  Recast as list if there's only one batter
-        if not isinstance(batters["batter"], list):
-            batters["batter"] = [batters["batter"]]
-
+    for team in boxscore["teams"]:
+        #  Print batting stats
         sys.stdout.write("   %-20s  PA   H  BB   R  HR  SO    OBP    OPS\n" %
-                         
-                         game[batters["team_flag"]+"_team_name"]  )
+                         boxscore["teams"][team]["team"]["abbreviation"] )
                           
         # batter variables we want to sum
-        keystosum = ["ab", "h", "bb", "r", "hr", "so", "hbp", "sac"]
+        keystosum = ["atBats", "hits", "baseOnBalls", "runs", "homeRuns", "strikeOuts", "hitByPitch", "sacFlies", "sacBunts"]
         sums = {}
         for k in keystosum: 
             sums[k] = 0
 
-        for p in batters["batter"]:
+        batters = boxscore["teams"][team]["batters"] 
+
+        for pid in batters:
+            p = boxscore["teams"][team]["players"]["ID"+str(pid)]
+
+            bstats = p["stats"]["batting"]
+            sstats = p["seasonStats"]["batting"]
+
             try:
                 sys.stdout.write("%-23s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (
-                    "%2s %s" % (p["pos"], p["name_display_first_last"] ), \
-                    int(p["ab"]) + int(p["bb"]) + int(p["hbp"]) + int(p["sac"]), int(p["h"]), int(p["bb"]), int(p["r"]),\
-                    int(p["hr"]), int(p["so"]), float(p['obp']), float(p['obp']) + float(p['slg'])) )
+                    "%2s %s" % (p["position"]["abbreviation"], p["person"]["fullName"] ), \
+                    int(bstats["atBats"]) + int(bstats["baseOnBalls"]) + int(bstats["hitByPitch"]) + int(bstats["sacFlies"])+int(bstats["sacBunts"]), int(bstats["hits"]), int(bstats["baseOnBalls"]), int(bstats["runs"]),\
+                    int(bstats["homeRuns"]), int(bstats["strikeOuts"]), float(sstats['obp']), float(sstats['obp']) + float(sstats['slg'])) )
             except Exception as e:
                 print(e)
 
             for k in sums.keys():
-                sums[k] += float(p[k])
+                sums[k] += float(bstats[k])
         sys.stdout.write("   %-20s %3d %3d %3d %3d %3d %3d\n\n" % ("TOTAL", \
-            int(sums["ab"]) + int(sums["bb"]) + int(sums["hbp"]) + int(sums["sac"]), \
-            int(sums["h"]), int(sums["bb"]), int(sums["r"]), int(sums["hr"]), int(sums["so"]) ))
+            int(sums["atBats"]) + int(sums["baseOnBalls"]) + int(sums["hitByPitch"]) + int(sums["sacFlies"]) + int(sums["sacBunts"]), \
+            int(sums["hits"]), int(sums["baseOnBalls"]), int(sums["runs"]), int(sums["homeRuns"]), int(sums["strikeOuts"]) ))
 
     
 
     #  Print pitchers IP count SO H, BB, R  HR, etc and sum
-    for pitchers in boxscore["pitching"]:
-
-        #  Ugh.  Recast as list if there's only one pitcher
-        if not isinstance(pitchers["pitcher"], list):
-            pitchers["pitcher"] = [pitchers["pitcher"]]
+    for team in boxscore["teams"]:
 
         sys.stdout.write("   %-20s   IP  PC SO  H BB  R HR   ERA\n" %
-                         
-                         game[pitchers["team_flag"]+"_team_name"]  )
+                          boxscore["teams"][team]["team"]["abbreviation"] )                
                           
-        keystosum = ["out", "np", "so", "h", "bb", "r", "hr"]
+        keystosum = ["outs", "inningsPitched", "strikeOuts", "hits", "baseOnBalls", "runs", "homeRuns"]
         # pitcher variables we want to sum
         sums = {}
         for k in keystosum: 
             sums[k] = 0
 
-        for p in pitchers["pitcher"]:
+        pitchers = boxscore["teams"][team]["pitchers"] 
+
+        for pid in pitchers:
+            p = boxscore["teams"][team]["players"]["ID"+str(pid)]
+
+            pstats = p["stats"]["pitching"]
+            sstats = p["seasonStats"]["pitching"]
+
             try:
                 sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n" % \
-                    (p["name_display_first_last"],  float(p["out"])/3, int(p["np"]), \
-                      int(p["so"]), int(p["h"]), int(p["bb"]), int(p["r"]), int(p["hr"]), float(p["era"] )))
+                    (p["person"]["fullName"],  float(pstats["outs"])/3, float(pstats["inningsPitched"]), \
+                      int(pstats["strikeOuts"]), int(pstats["hits"]), int(pstats["baseOnBalls"]), int(pstats["runs"]), int(pstats["homeRuns"]), float(sstats["era"] )))
             except Exception as e:
                 print(e)
 
             for k in sums.keys():
-                sums[k] += float(p[k])
+                sums[k] += float(pstats[k])
         sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d\n\n" % ("TOTAL", \
-            float(sums["out"])/3, int(sums["np"]), int(sums["so"]), int(sums["h"]), \
-            int(sums["bb"]), int(sums["r"]), int(sums["hr"])))
+            float(sums["outs"])/3, float(sums["inningsPitched"]), int(sums["strikeOuts"]), int(sums["hits"]), \
+            int(sums["baseOnBalls"]), int(sums["runs"]), int(sums["homeRuns"])))
 
 def load_standings(uri):
     standingsjson = urllib2.urlopen(uri)
