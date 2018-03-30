@@ -27,7 +27,7 @@ timezone = "CT"
 timeshift = { "ET" : 0, "CT" : 1, "MT": 2, "PT" : 3}
 
 base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
-base_boxscore_url   = "https://statsapi.mlb.com/api/v1/game/%s/boxscore"
+base_boxscore_url   = "http://statsapi.mlb.com/api/v1/game/%s/boxscore"
 base_standings_uri  = "http://mlb.com/lookup/json/named.standings_schedule_date.bam?season=%4s&schedule_game_date.game_date='%8s'&sit_code='h0'&league_id=103&league_id=104&all_star_sw='N'&version=2"
 max_uri_retry = 5    # standings URI sometimes doesn't respond
 wait_until_retry = 5 # number of seconds to wait until retrying standings after failure
