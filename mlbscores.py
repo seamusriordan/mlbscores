@@ -83,9 +83,8 @@ def printgame(game):
             
 def printdetails(game):
     # Print more detailed line score
-    ninn = max(9, len(game["linescore"]["inning"]))
-
     try:
+        ninn = max(9, len(game["linescore"]["inning"]))
         linescore = game["linescore"]
     except:
         print("Line score not found")
