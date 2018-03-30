@@ -95,7 +95,7 @@ def printdetails(game):
     sys.stdout.write("    ")
     for i in range(ninn):
         sys.stdout.write("%2d " % (i+1))
-    sys.stdout.write("|  H  R  E SO\n")
+    sys.stdout.write("|  H  R  E\n")
     
     sys.stdout.write("%-4s" % game["away_name_abbrev"])
     
@@ -109,9 +109,9 @@ def printdetails(game):
     # Pad if innings are missing
     for i in range(ninn - len(linescore["inning"])):
         sys.stdout.write("   ")
-    sys.stdout.write("| %2d %2d %2d %2d\n" % \
+    sys.stdout.write("| %2d %2d %2d\n" % \
       (int(linescore["h"]["away"]), int(linescore["r"]["away"]), \
-        int(linescore["e"]["away"]), int(linescore["so"]["home"]))  )
+        int(linescore["e"]["away"]))  )
     
     # Print for what we have data for home team, same as above
     sys.stdout.write("%-4s" % game["home_name_abbrev"])
@@ -123,9 +123,9 @@ def printdetails(game):
     # Pad if innings are missing
     for i in range(ninn - len(linescore["inning"])):
         sys.stdout.write("   ")
-    sys.stdout.write("| %2d %2d %2d %2d\n" % \
+    sys.stdout.write("| %2d %2d %2d\n" % \
       (int(linescore["h"]["home"]), int(linescore["r"]["home"]), \
-        int(linescore["e"]["home"]), int(linescore["so"]["away"]))  )
+        int(linescore["e"]["home"]))  )
 
 
 def printboxscore(game):
