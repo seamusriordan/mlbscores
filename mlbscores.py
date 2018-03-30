@@ -247,6 +247,11 @@ def print_standings():
     for div in orderedkeys:
         sys.stdout.write("%-24s    W    L       %%   GB WCGB  L10 Strk\n" % div)
         for team in divdict[div]:
+            try:
+                float(team['pct'])
+            except:
+                team['pct'] = 0.0
+
             sys.stdout.write("%-24s %4d %4d   %5.3f %4s %4s %4s %4s\n" \
                 % (team['team_full'], int(team['w']), int(team['l']), float(team['pct']), \
                     team['gb'], team['gb_wildcard'], team['last_ten'], team['streak'] ))
