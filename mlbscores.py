@@ -176,7 +176,7 @@ def printboxscore(game):
         sys.stdout.write("   %-20s   IP  PC SO  H BB  R HR   ERA\n" %
                           boxscore["teams"][team]["team"]["name"] )                
                           
-        keystosum = ["outs", "inningsPitched", "strikeOuts", "hits", "baseOnBalls", "runs", "homeRuns"]
+        keystosum = ["pitchesThrown", "inningsPitched", "strikeOuts", "hits", "baseOnBalls", "runs", "homeRuns"]
         # pitcher variables we want to sum
         sums = {}
         for k in keystosum: 
@@ -192,7 +192,8 @@ def printboxscore(game):
 
             try:
                 sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n" % \
-                    (p["person"]["fullName"],  float(pstats["outs"])/3, float(pstats["inningsPitched"]), \
+                    (p["person"]["fullName"],  #float(pstats["outs"])/3, float(pstats["inningsPitched"]), \
+                    float(pstats["inningsPitched"]),  int(pstats["pitchesThrown"]), \
                       int(pstats["strikeOuts"]), int(pstats["hits"]), int(pstats["baseOnBalls"]), int(pstats["runs"]), int(pstats["homeRuns"]), float(sstats["era"] )))
             except Exception as e:
                 print(e)
@@ -200,7 +201,8 @@ def printboxscore(game):
             for k in sums.keys():
                 sums[k] += float(pstats[k])
         sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d\n\n" % ("TOTAL", \
-            float(sums["outs"])/3, float(sums["inningsPitched"]), int(sums["strikeOuts"]), int(sums["hits"]), \
+            #float(sums["outs"])/3, 
+            float(sums["inningsPitched"]), int(sums["pitchesThrown"]), int(sums["strikeOuts"]), int(sums["hits"]), \
             int(sums["baseOnBalls"]), int(sums["runs"]), int(sums["homeRuns"])))
 
 def load_standings(uri):
