@@ -200,9 +200,9 @@ def printboxscore(game):
 
             for k in sums.keys():
                 sums[k] += float(pstats[k])
-        sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d\n\n" % ("TOTAL", \
-            #float(sums["outs"])/3, 
-            float(sums["inningsPitched"]), int(sums["pitchesThrown"]), int(sums["strikeOuts"]), int(sums["hits"]), \
+        sys.stdout.write("   %-20s      %3d %2d %2d %2d %2d %2d\n\n" % ("TOTAL", \
+            #float(sums["outs"])/3, float(sums["inningsPitched"]),
+            int(sums["pitchesThrown"]), int(sums["strikeOuts"]), int(sums["hits"]), \
             int(sums["baseOnBalls"]), int(sums["runs"]), int(sums["homeRuns"])))
 
 def load_standings(uri):
