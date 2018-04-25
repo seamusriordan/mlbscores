@@ -44,14 +44,17 @@ def printgame(game):
     
     status = game["status"]["status"]
 
-    [time_h, time_m] = [ int(x) for x in game["time"].split(":")]
-    time_h -= timeshift[timezone]
-    if time_h < 1:
-        time_h += 12
+    try:
+        [time_h, time_m] = [ int(x) for x in game["time"].split(":")]
+        time_h -= timeshift[timezone]
+        if time_h < 1:
+            time_h += 12
 
-    game["time"] = "%2d:%02d" % (time_h, time_m)
-    game["time_zone"] = timezone
-    
+        game["time"] = "%2d:%02d" % (time_h, time_m)
+        game["time_zone"] = timezone
+    except:
+        game["time_zone"] = ""
+
     if status == "Preview":
         # FIXME:  Add real timezone support
         sys.stdout.write("  %6s %s " % (game["time"], game["time_zone"]))
