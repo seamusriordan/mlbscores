@@ -28,7 +28,7 @@ timeshift = { "ET" : 0, "CT" : 1, "MT": 2, "PT" : 3}
 
 base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
 base_boxscore_url   = "http://statsapi.mlb.com/api/v1/game/%s/boxscore"
-base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=regularSeason&hydrate=division,conference,league"
+base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=regularSeason,springTraining&hydrate=division,conference,league"
 max_uri_retry = 5    # standings URI sometimes doesn't respond
 wait_until_retry = 5 # number of seconds to wait until retrying standings after failure
 
@@ -241,25 +241,38 @@ def print_standings():
 
     sys.stdout.write("\n")
     for division in standings:
-        if division['standingsType'] == "regularSeason":
+#        if division['standingsType'] == "regularSeason":
+        if division['standingsType'] == "springTraining":
             for team in division["teamRecords"]:
                 try:
                     divdict[division['division']['name']].append(team)
                 except:
-                    orderedkeys.append(division['division']['name'] )
+                    orderedkeys.append( (division['division']['name'], division['division']['id']) )
                     divdict[division['division']['name']] = [team]
 
-    for div in orderedkeys:
-        sys.stdout.write("%-24s    W    L       %%   GB WCGB  L10   Strk\n" % div)
+#    for divpair in sorted(orderedkeys, key= lambda k: k[1] ):
+#        div = divpair[0]
+    #  Just hardcode an order...
+    for div in [u'American League East', u'American League Central',u'American League West', u'National League East',  u'National League Central', u'National League West']:
+        sys.stdout.write("%-24s    W    L       %%   GB WCGB   L10 Strk\n" % div)
+        # Clean up entries first
         for team in divdict[div]:
             try:
                 float(team['pct'])
             except:
                 team['pct'] = 0.0
 
+            try:
+                team['streak']['streakCode']
+            except:
+                team['streak'] = {}
+                team['streak']['streakCode'] = "-"
+
+        for team in sorted(divdict[div], key= lambda d: d['divisionRank'] ):
             sys.stdout.write("%-24s %4d %4d   %5.3f %4s %4s %2d-%2d %4s\n" \
                 % (team['team']['name'], int(team['wins']), int(team['losses']), float(team['winningPercentage']), \
-                    team['gamesBack'], team['wildCardGamesBack'], team['records']['splitRecords'][4]['wins'], team['records']['splitRecords'][4]['losses'], team['records']['splitRecords'][7]['wins']))
+#                    team['gamesBack'], team['wildCardGamesBack'], team['records']['splitRecords'][4]['wins'], team['records']['splitRecords'][4]['losses'],  team['streak']['streakCode']) )
+                    0, 0, team['records']['splitRecords'][4]['wins'], team['records']['splitRecords'][4]['losses'], team['streak']['streakCode']))
 
         sys.stdout.write("\n")
     sys.stdout.write("\n")
