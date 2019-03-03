@@ -47,7 +47,7 @@ def printgame(game):
     # if the game hasn't started, when and who is pitching
     sys.stdout.write("%-3s @ %-3s   " % (game["teams"]["away"]["team"]["abbreviation"], game["teams"]["home"]["team"]["abbreviation"]))
     
-    status = game["status"]["abstractGameState"]
+    status = game["status"]["detailedState"]
 
 
 
@@ -60,7 +60,7 @@ def printgame(game):
         game["time"] = "Good thing time does not exist"
 
 
-    if (status == "Preview") or (status == "Pregame"):
+    if (status == "Preview") or (status == "Pre-Game"):
         sys.stdout.write("  %9s" % (game["time"]))
 
         try:
@@ -90,12 +90,9 @@ def printgame(game):
         if not status == "In Progress":
             sys.stdout.write( "%-9s" %( status ))
         else:
-            innpart = "Mid"
-            if game["status"]["inning"] == "Y":
-                innpart = "Top" 
-            else: 
-                innpart = "Bot"
-            sys.stdout.write( "%3s %-5s" %( innpart, game["status"]["inning"]   ))
+            innpart = game["linescore"]["inningState"]
+            
+            sys.stdout.write( "%3s %-5s" %( innpart, game["linescore"]["currentInningOrdinal"]   ))
         
         if status == "Postponed":
             sys.stdout.write( "  (%s)" %(game["status"]["reason"] ))
