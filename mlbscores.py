@@ -26,6 +26,7 @@ daytime_rollover = 10
 timezone = "CT"
 timeshift = { "ET" : 0, "CT" : 1, "MT": 2, "PT" : 3}
 
+# FIXME  migrate to statsapi
 base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
 base_boxscore_url   = "http://statsapi.mlb.com/api/v1/game/%s/boxscore"
 base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=regularSeason,springTraining&hydrate=division,conference,league"
@@ -55,7 +56,7 @@ def printgame(game):
     except:
         game["time_zone"] = ""
 
-    if status == "Preview":
+    if (status == "Preview") or (status == "Pregame"):
         # FIXME:  Add real timezone support
         sys.stdout.write("  %6s %s " % (game["time"], game["time_zone"]))
         homep = game["home_probable_pitcher"]
