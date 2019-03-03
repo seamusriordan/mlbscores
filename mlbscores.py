@@ -10,10 +10,16 @@
 # up to date scores, reduced box score, or standings
 # Self contained script
 
+USE_CERTIFI = True
 
 import json
 import urllib3
-urllib3.disable_warnings()
+try:
+    import certifi
+except:
+    USE_CERTIFI = False
+    urllib3.disable_warnings()
+
 import datetime
 from datetime import timezone
 import sys
@@ -157,7 +163,12 @@ def printboxscore(game):
     # Print reduced box score data for all batters and pitchers
     boxscore_url = base_boxscore_url % game["gamePk"] 
 
-    boxjsondata = urllib3.PoolManager().request('GET', boxscore_url)
+    
+    boxjsondata = ''
+    if USE_CERTIFI:
+        urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET', boxscore_url)
+    else:
+        urllib3.PoolManager().request('GET', boxscore_url)
     #boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
     boxscore= json.loads(boxjsondata.data)
 
@@ -240,7 +251,12 @@ def printboxscore(game):
             int(sums["baseOnBalls"]), int(sums["runs"]), int(sums["homeRuns"])))
 
 def load_standings(uri):
-    standingsjson = urllib3.PoolManager().request('GET', uri)
+    standingsjson = ''
+    if USE_CERTIFI:
+        standingsjson = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET', uri)
+    else:
+        standingsjson = urllib3.PoolManager().request('GET', uri)
+
     standings = json.loads(standingsjson.data)["records"]
     return standings
 
@@ -348,7 +364,7 @@ def main(argv):
 
     # Form JSON URL and load
     scoreboard_url = base_scoreboard_url % (now.year, now.month, now.day)
-    scoreboardjson = urllib3.PoolManager().request('GET',scoreboard_url)
+    scoreboardjson = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET',scoreboard_url)
     gamejson       = json.loads(scoreboardjson.data)["dates"][0]["games"]
     
     # Presort games
