@@ -157,6 +157,11 @@ def printboxscore(game):
             bstats = p["stats"]["batting"]
             sstats = p["seasonStats"]["batting"]
 
+            # Vars that may not be defined
+            for k in keystosum:
+                if not k in bstats:
+                    bstats[k] = 0
+
             try:
                 sys.stdout.write("%-23s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n" % (
                     "%2s %s" % (p["position"]["abbreviation"], p["person"]["fullName"] ), \
@@ -166,7 +171,10 @@ def printboxscore(game):
                 print(e)
 
             for k in sums.keys():
-                sums[k] += float(bstats[k])
+                try:
+                    sums[k] += float(bstats[k])
+                except:
+                    sums[k] += 0.0
         sys.stdout.write("   %-20s %3d %3d %3d %3d %3d %3d\n\n" % ("TOTAL", \
             int(sums["atBats"]) + int(sums["baseOnBalls"]) + int(sums["hitByPitch"]) + int(sums["sacFlies"]) + int(sums["sacBunts"]), \
             int(sums["hits"]), int(sums["baseOnBalls"]), int(sums["runs"]), int(sums["homeRuns"]), int(sums["strikeOuts"]) ))
