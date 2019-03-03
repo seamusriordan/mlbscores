@@ -65,13 +65,19 @@ def printgame(game):
         # FIXME:  Add real timezone support
         sys.stdout.write("  %9s" % (game["time"]))
 
-        homep = game["teams"]["home"]["probablePitcher"]
+        try:
+            homep = game["teams"]["home"]["probablePitcher"]
+        except:
+            homep = {'lastName': "--"}
         try:
             homep["era"] = str(homep["stats"][1]["stats"]["era"])
         except:
             homep["era"] = "-"
         
-        awayp = game["teams"]["away"]["probablePitcher"]
+        try:
+            awayp = game["teams"]["away"]["probablePitcher"]
+        except:
+            awayp = {'lastName': "--"}
         try:
             awayp["era"] = str(awayp["stats"][1]["stats"]["era"])
         except:
