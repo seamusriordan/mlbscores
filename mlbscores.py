@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 # mlb scores and standing utility
 #
@@ -12,8 +12,10 @@
 
 
 import json
-import urllib2
+import urllib3
+urllib3.disable_warnings()
 import datetime
+from datetime import timezone
 import sys
 import time
 import argparse
@@ -23,11 +25,9 @@ bestteams = ["CHC"]
 # Switch from previous scores to today's scores at 10AM
 daytime_rollover = 10 
 
-timezone = "CT"
-timeshift = { "ET" : 0, "CT" : 1, "MT": 2, "PT" : 3}
-
 # FIXME  migrate to statsapi
-base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
+#base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
+base_scoreboard_url = "https://statsapi.mlb.com/api/v1/schedule?sportId=1,51&date=%04d-%02d-%02d&leagueId=103,104,420&hydrate=team,linescore(matchup,runners),flags,person,probablePitcher,stats,game(summary)&useLatestGames=false&language=en"
 base_boxscore_url   = "http://statsapi.mlb.com/api/v1/game/%s/boxscore"
 base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=regularSeason,springTraining&hydrate=division,conference,league"
 max_uri_retry = 5    # standings URI sometimes doesn't respond
@@ -41,29 +41,45 @@ class URIException( BaseException ):
 def printgame(game):
     # Print out basic game status and score, or 
     # if the game hasn't started, when and who is pitching
-    sys.stdout.write("%-3s @ %-3s   " % (game["away_name_abbrev"], game["home_name_abbrev"]))
+    sys.stdout.write("%-3s @ %-3s   " % (game["teams"]["away"]["team"]["abbreviation"], game["teams"]["home"]["team"]["abbreviation"]))
     
-    status = game["status"]["status"]
+    status = game["status"]["abstractGameState"]
+
+
 
     try:
-        [time_h, time_m] = [ int(x) for x in game["time"].split(":")]
-        time_h -= timeshift[timezone]
-        if time_h < 1:
-            time_h += 12
+        #  Example "2019-03-03T18:05:00Z"
 
-        game["time"] = "%2d:%02d" % (time_h, time_m)
-        game["time_zone"] = timezone
+        gtime = datetime.datetime.strptime(game["gameDate"], "%Y-%m-%dT%H:%M:%SZ")
+        gtime = gtime.replace(tzinfo= timezone.utc ).astimezone(tz=None)
+#        print("[Game time] ",  gtime, gtime.tzname())
+
+#        [time_h, time_m] = [ int(x) for x in .split(":")]
+
+        game["time"] = "%2d:%02d %s" % (gtime.hour, gtime.minute, gtime.tzname())
     except:
-        game["time_zone"] = ""
+        game["time"] = "Good thing time does not exist"
+
 
     if (status == "Preview") or (status == "Pregame"):
         # FIXME:  Add real timezone support
-        sys.stdout.write("  %6s %s " % (game["time"], game["time_zone"]))
-        homep = game["home_probable_pitcher"]
-        awayp = game["away_probable_pitcher"]
+        sys.stdout.write("  %9s" % (game["time"]))
+
+        homep = game["teams"]["home"]["probablePitcher"]
+        try:
+            homep["era"] = str(homep["stats"][1]["stats"]["era"])
+        except:
+            homep["era"] = "-"
+        
+        awayp = game["teams"]["away"]["probablePitcher"]
+        try:
+            awayp["era"] = str(awayp["stats"][1]["stats"]["era"])
+        except:
+            awayp["era"] = "-"
+
 
         sys.stdout.write("%12s (%s) vs %12s (%s)"
-            % ( awayp["last_name"], awayp["era"],  homep["last_name"], homep["era"] )  \
+            % ( awayp["lastName"], awayp["era"],  homep["lastName"], homep["era"] )  \
             )
 
     else: 
@@ -81,14 +97,14 @@ def printgame(game):
             sys.stdout.write( "  (%s)" %(game["status"]["reason"] ))
             
         if "linescore" in game:
-            hscore = int( game["linescore"]["r"]["home"] )
-            ascore = int( game["linescore"]["r"]["away"] )
+            hscore = int( game["linescore"]["teams"]["home"]["runs"] )
+            ascore = int( game["linescore"]["teams"]["away"]["runs"] )
             sys.stdout.write("  %2d-%-2d" %( ascore, hscore ))
             
 def printdetails(game):
     # Print more detailed line score
     try:
-        ninn = max(9, len(game["linescore"]["inning"]))
+        ninn = max(9, len(game["linescore"]["innings"]))
         linescore = game["linescore"]
     except:
         print("Line score not found")
@@ -100,44 +116,52 @@ def printdetails(game):
         sys.stdout.write("%2d " % (i+1))
     sys.stdout.write("|  H  R  E\n")
     
-    sys.stdout.write("%-4s" % game["away_name_abbrev"])
+    sys.stdout.write("%-4s" %  game["teams"]["away"]["team"]["abbreviation"] )
     
     # Print for what we have data for
-    for i in range(len(linescore["inning"])):
+    for i in range(len(linescore["innings"])):
         try:
-            sys.stdout.write("%2d " % int( linescore["inning"][i]["away"] ) )
+            sys.stdout.write("%2d " % int( linescore["innings"][i]["away"]["runs"] ) )
         except:
             sys.stdout.write("   ")
 
     # Pad if innings are missing
-    for i in range(ninn - len(linescore["inning"])):
+    for i in range(ninn - len(linescore["innings"])):
         sys.stdout.write("   ")
+
+    for t in ["home", "away"]:
+        for k in ["hits", "runs", "errors"]:
+            try:
+                linescore["teams"][t][k]
+            except:
+                linescore["teams"][t][k] = 0
+
     sys.stdout.write("| %2d %2d %2d\n" % \
-      (int(linescore["h"]["away"]), int(linescore["r"]["away"]), \
-        int(linescore["e"]["away"]))  )
+      (int(linescore["teams"]["away"]["hits"]), int(linescore["teams"]["away"]["runs"]), \
+      int(linescore["teams"]["away"]["errors"]))  )
     
     # Print for what we have data for home team, same as above
-    sys.stdout.write("%-4s" % game["home_name_abbrev"])
-    for i in range(len(linescore["inning"])):
+    sys.stdout.write("%-4s" % game["teams"]["home"]["team"]["abbreviation"])
+    for i in range(len(linescore["innings"])):
         try:
-            sys.stdout.write("%2d " % int( linescore["inning"][i]["home"] ) )
+            sys.stdout.write("%2d " % int( linescore["innings"][i]["home"]["runs"] ) )
         except:
             sys.stdout.write("   ")
     # Pad if innings are missing
-    for i in range(ninn - len(linescore["inning"])):
+    for i in range(ninn - len(linescore["innings"])):
         sys.stdout.write("   ")
     sys.stdout.write("| %2d %2d %2d\n" % \
-      (int(linescore["h"]["home"]), int(linescore["r"]["home"]), \
-        int(linescore["e"]["home"]))  )
+      (int(linescore["teams"]["home"]["hits"]), int(linescore["teams"]["home"]["runs"]), \
+        int(linescore["teams"]["home"]["errors"]))  )
 
 
 def printboxscore(game):
     # Print reduced box score data for all batters and pitchers
-    boxscore_url = base_boxscore_url % game["game_pk"] 
+    boxscore_url = base_boxscore_url % game["gamePk"] 
 
-    boxjsondata = urllib2.urlopen(boxscore_url)
+    boxjsondata = urllib3.PoolManager().request('GET', boxscore_url)
     #boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
-    boxscore= json.loads(boxjsondata.read())
+    boxscore= json.loads(boxjsondata.data)
 
     for team in boxscore["teams"]:
         #  Print batting stats
@@ -218,8 +242,8 @@ def printboxscore(game):
             int(sums["baseOnBalls"]), int(sums["runs"]), int(sums["homeRuns"])))
 
 def load_standings(uri):
-    standingsjson = urllib2.urlopen(uri)
-    standings = json.loads(standingsjson.read())["records"]
+    standingsjson = urllib3.PoolManager().request('GET', uri)
+    standings = json.loads(standingsjson.data)["records"]
     return standings
 
 
@@ -326,35 +350,30 @@ def main(argv):
 
     # Form JSON URL and load
     scoreboard_url = base_scoreboard_url % (now.year, now.month, now.day)
-    scoreboardjson = urllib2.urlopen(scoreboard_url)
-    gamejson       = json.loads(scoreboardjson.read())["data"]["games"]
-
+    scoreboardjson = urllib3.PoolManager().request('GET',scoreboard_url)
+    gamejson       = json.loads(scoreboardjson.data)["dates"][0]["games"]
+    
     # Presort games
     bestgames      = []
     remaininggames = []
     
-    if not "game" in gamejson:
+    if len(gamejson) == 0:
         sys.stdout.write("No games scheduled for " + now.strftime("%A %B %d, %Y") + "\n\n")
         return
 
-    readgames = gamejson['game']
-
 # If there's a single game JSON just has it as a key rather than
 # an array.  We recast it like such so we can process it as normal
-    if 'id' in readgames:
-        readgames = [readgames]
-
     games = []
         
     # Filter by date
-    thisdate = now.strftime("%Y/%m/%d")
-    for game in readgames:
-        if game['original_date'] == thisdate:
-            games.append(game)
+    #thisdate = now.strftime("%Y/%m/%d")
+    #for game in gamesjson:
+    #    if game['original_date'] == thisdate:
+    #        games.append(game)
 
-    for game in games:
-        if any( game["away_name_abbrev"] == s for s in bestteams ) or \
-            any( game["home_name_abbrev"] == s for s in bestteams ):
+    for game in gamejson:
+        if any( game["teams"]["away"]["team"]["abbreviation"] == s for s in bestteams ) or \
+            any( game["teams"]["home"]["team"]["abbreviation"] == s for s in bestteams ):
             bestgames.append(game)
         else:
             remaininggames.append(game)
