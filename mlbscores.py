@@ -90,7 +90,7 @@ def printgame(game):
         if not status == "In Progress":
             sys.stdout.write( "%-9s" %( status ))
         else:
-            innpart = game["linescore"]["inningState"]
+            innpart = game["linescore"]["inningState"][:3]
             
             sys.stdout.write( "%3s %-5s" %( innpart, game["linescore"]["currentInningOrdinal"]   ))
         
