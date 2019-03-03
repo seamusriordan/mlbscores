@@ -364,7 +364,12 @@ def main(argv):
 
     # Form JSON URL and load
     scoreboard_url = base_scoreboard_url % (now.year, now.month, now.day)
-    scoreboardjson = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET',scoreboard_url)
+    scoreboardjson = ''
+
+    if USE_CERTIFI:
+        scoreboardjson = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET',scoreboard_url)
+    else:
+        scoreboardjson = urllib3.PoolManager().request('GET',scoreboard_url)
     gamejson       = json.loads(scoreboardjson.data)["dates"][0]["games"]
     
     # Presort games
