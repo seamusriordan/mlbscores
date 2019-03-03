@@ -166,11 +166,15 @@ def printboxscore(game):
     
     boxjsondata = ''
     if USE_CERTIFI:
-        urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET', boxscore_url)
+        boxjsondata = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET', boxscore_url)
     else:
-        urllib3.PoolManager().request('GET', boxscore_url)
+        boxjsondata = urllib3.PoolManager().request('GET', boxscore_url)
     #boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
-    boxscore= json.loads(boxjsondata.data)
+    print("[box json data]",  boxjsondata)
+    try:
+        boxscore= json.loads(boxjsondata.data)
+    except:
+        sys.stdout.write("   No box score data available                \n")
 
     for team in boxscore["teams"]:
         #  Print batting stats
