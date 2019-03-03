@@ -60,7 +60,7 @@ def printgame(game):
         game["time"] = "Good thing time does not exist"
 
 
-    if (status == "Preview") or (status == "Pre-Game"):
+    if (status == "Preview") or (status == "Pre-Game") or (status == "Scheduled"):
         sys.stdout.write("  %9s" % (game["time"]))
 
         try:
@@ -98,9 +98,12 @@ def printgame(game):
             sys.stdout.write( "  (%s)" %(game["status"]["reason"] ))
             
         if "linescore" in game:
-            hscore = int( game["linescore"]["teams"]["home"]["runs"] )
-            ascore = int( game["linescore"]["teams"]["away"]["runs"] )
-            sys.stdout.write("  %2d-%-2d" %( ascore, hscore ))
+            try:
+                hscore = int( game["linescore"]["teams"]["home"]["runs"] )
+                ascore = int( game["linescore"]["teams"]["away"]["runs"] )
+                sys.stdout.write("  %2d-%-2d" %( ascore, hscore ))
+            except:
+                sys.stdout.write("     -    ")
             
 def printdetails(game):
     # Print more detailed line score
