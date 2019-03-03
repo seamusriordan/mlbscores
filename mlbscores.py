@@ -25,8 +25,6 @@ bestteams = ["CHC"]
 # Switch from previous scores to today's scores at 10AM
 daytime_rollover = 10 
 
-# FIXME  migrate to statsapi
-#base_scoreboard_url = "http://gd2.mlb.com/components/game/mlb/year_%4d/month_%02d/day_%02d/master_scoreboard.json"
 base_scoreboard_url = "https://statsapi.mlb.com/api/v1/schedule?sportId=1,51&date=%04d-%02d-%02d&leagueId=103,104,420&hydrate=team,linescore(matchup,runners),flags,person,probablePitcher,stats,game(summary)&useLatestGames=false&language=en"
 base_boxscore_url   = "http://statsapi.mlb.com/api/v1/game/%s/boxscore"
 base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=regularSeason,springTraining&hydrate=division,conference,league"
@@ -49,20 +47,14 @@ def printgame(game):
 
     try:
         #  Example "2019-03-03T18:05:00Z"
-
         gtime = datetime.datetime.strptime(game["gameDate"], "%Y-%m-%dT%H:%M:%SZ")
         gtime = gtime.replace(tzinfo= timezone.utc ).astimezone(tz=None)
-#        print("[Game time] ",  gtime, gtime.tzname())
-
-#        [time_h, time_m] = [ int(x) for x in .split(":")]
-
         game["time"] = "%2d:%02d %s" % (gtime.hour, gtime.minute, gtime.tzname())
     except:
         game["time"] = "Good thing time does not exist"
 
 
     if (status == "Preview") or (status == "Pregame"):
-        # FIXME:  Add real timezone support
         sys.stdout.write("  %9s" % (game["time"]))
 
         try:
