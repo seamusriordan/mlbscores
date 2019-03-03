@@ -66,7 +66,7 @@ def printgame(game):
         try:
             homep = game["teams"]["home"]["probablePitcher"]
         except:
-            homep = {'lastName': "--"}
+            homep = {'lastName': "TBD"}
         try:
             homep["era"] = str(homep["stats"][1]["stats"]["era"])
         except:
@@ -75,7 +75,7 @@ def printgame(game):
         try:
             awayp = game["teams"]["away"]["probablePitcher"]
         except:
-            awayp = {'lastName': "--"}
+            awayp = {'lastName': "TBD"}
         try:
             awayp["era"] = str(awayp["stats"][1]["stats"]["era"])
         except:
