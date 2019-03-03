@@ -170,7 +170,6 @@ def printboxscore(game):
     else:
         boxjsondata = urllib3.PoolManager().request('GET', boxscore_url)
     #boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
-    print("[box json data]",  boxjsondata)
     try:
         boxscore= json.loads(boxjsondata.data)
     except:
