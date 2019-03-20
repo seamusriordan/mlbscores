@@ -67,7 +67,7 @@ def printgame(game):
         try:
             homep = game["teams"]["home"]["probablePitcher"]
         except:
-            homep = {'lastName': "--"}
+            homep = {'lastName': "TBD"}
         try:
             homep["era"] = str(homep["stats"][1]["stats"]["era"])
         except:
@@ -76,7 +76,7 @@ def printgame(game):
         try:
             awayp = game["teams"]["away"]["probablePitcher"]
         except:
-            awayp = {'lastName': "--"}
+            awayp = {'lastName': "TBD"}
         try:
             awayp["era"] = str(awayp["stats"][1]["stats"]["era"])
         except:
@@ -170,8 +170,6 @@ def printboxscore(game):
         boxjsondata = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET', boxscore_url)
     else:
         boxjsondata = urllib3.PoolManager().request('GET', boxscore_url)
-    #boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
-#    print("[box json data]",  boxjsondata)
     try:
         boxscore= json.loads(boxjsondata.data)
     except:
