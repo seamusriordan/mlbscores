@@ -55,7 +55,8 @@ def printgame(game):
         #  Example "2019-03-03T18:05:00Z"
         gtime = datetime.datetime.strptime(game["gameDate"], "%Y-%m-%dT%H:%M:%SZ")
         gtime = gtime.replace(tzinfo= timezone.utc ).astimezone(tz=None)
-        game["time"] = "%2d:%02d %s" % (gtime.hour, gtime.minute, gtime.tzname())
+        #game["time"] = gtime.strftime("%I:%M %p %Z")
+        game["time"] = gtime.strftime("%H:%M %Z")
     except:
         game["time"] = "Good thing time does not exist"
 
@@ -170,7 +171,7 @@ def printboxscore(game):
     else:
         boxjsondata = urllib3.PoolManager().request('GET', boxscore_url)
     #boxscore= json.loads(boxjsondata.read())["data"]["boxscore"]
-    print("[box json data]",  boxjsondata)
+#    print("[box json data]",  boxjsondata)
     try:
         boxscore= json.loads(boxjsondata.data)
     except:
@@ -239,11 +240,17 @@ def printboxscore(game):
             pstats = p["stats"]["pitching"]
             sstats = p["seasonStats"]["pitching"]
 
+            era_asfloat = 0.0
+            try:
+                era_asfloat = float(sstats["era"] )
+            except:
+                era_asfloat = 0.0
+
             try:
                 sys.stdout.write("   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n" % \
                     (p["person"]["fullName"],  #float(pstats["outs"])/3, float(pstats["inningsPitched"]), \
                     float(pstats["inningsPitched"]),  int(pstats["pitchesThrown"]), \
-                      int(pstats["strikeOuts"]), int(pstats["hits"]), int(pstats["baseOnBalls"]), int(pstats["runs"]), int(pstats["homeRuns"]), float(sstats["era"] )))
+                      int(pstats["strikeOuts"]), int(pstats["hits"]), int(pstats["baseOnBalls"]), int(pstats["runs"]), int(pstats["homeRuns"]), era_asfloat))
             except Exception as e:
                 print(e)
 
