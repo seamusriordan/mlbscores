@@ -33,7 +33,7 @@ daytime_rollover = 10
 
 base_scoreboard_url = "https://statsapi.mlb.com/api/v1/schedule?sportId=1,51&date=%04d-%02d-%02d&leagueId=103,104,420&hydrate=team,linescore(matchup,runners),flags,person,probablePitcher,stats,game(summary)&useLatestGames=false&language=en"
 base_boxscore_url   = "http://statsapi.mlb.com/api/v1/game/%s/boxscore"
-base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=regularSeason,springTraining&hydrate=division,conference,league"
+base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=springTraining,regularSeason&hydrate=division,conference,league"
 max_uri_retry = 5    # standings URI sometimes doesn't respond
 wait_until_retry = 5 # number of seconds to wait until retrying standings after failure
 
@@ -297,8 +297,8 @@ def print_standings():
 
     sys.stdout.write("\n")
     for division in standings:
-#        if division['standingsType'] == "regularSeason":
-        if division['standingsType'] == "springTraining":
+        if division['standingsType'] == "regularSeason":
+#        if division['standingsType'] == "springTraining":
             for team in division["teamRecords"]:
                 try:
                     divdict[division['division']['name']].append(team)
