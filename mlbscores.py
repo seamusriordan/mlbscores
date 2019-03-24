@@ -265,7 +265,7 @@ class game:
         self.printScore()
 
     def printProgress(self):
-        sys.stdout.write( "  %3s %-5s" %( self.inningState, self.currentInningOrdinal ))
+        sys.stdout.write( "  %3s %-9s" %( self.inningState, self.currentInningOrdinal ))
         
 
     def printStatus(self):
@@ -274,10 +274,10 @@ class game:
             self.printStatusReason()
 
     def printStatusPrefix(self):
-        sys.stdout.write( "  %-11s" %( self.gameStatus ))
+        sys.stdout.write( "  %-13s" %( self.gameStatus ))
 
     def printStatusReason(self):
-        sys.stdout.write( "  (%s)" %(self.gameStatusReason))
+        sys.stdout.write( "  (%6s)" %(self.gameStatusReason))
 
     def isInProgress(self):
         return self.gameStatus == 'In Progress'
@@ -289,7 +289,7 @@ class game:
         if self.hasLineScore():
             homeTeamRuns = self.teams['home'].getTotalRuns()
             awayTeamRuns = self.teams['away'].getTotalRuns()
-            sys.stdout.write("  %2d-%-2d" %( awayTeamRuns, homeTeamRuns ))
+            sys.stdout.write("%2d-%-2d" %( awayTeamRuns, homeTeamRuns ))
         else:
             sys.stdout.write("     -    ")
 
