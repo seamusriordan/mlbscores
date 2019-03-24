@@ -542,7 +542,7 @@ class gameDay:
             self.fillGameData(aGame)
        
     def printGameDayHeader(self):
-        sys.stdout.write("Baseball for " + self.gameDayDate.strftime("%A %B %d, %Y") + "\n\n")
+        sys.stdout.write("\nBaseball for " + self.gameDayDate.strftime("%A %B %d, %Y") + "\n\n")
         return
     
     def printAllGames(self, showBoxScore):
