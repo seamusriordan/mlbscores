@@ -265,7 +265,7 @@ class game:
         self.printScore()
 
     def printProgress(self):
-        sys.stdout.write( "%3s %-5s" %( self.inningState, self.currentInningOrdinal ))
+        sys.stdout.write( "  %3s %-5s" %( self.inningState, self.currentInningOrdinal ))
         
 
     def printStatus(self):
