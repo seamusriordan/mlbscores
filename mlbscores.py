@@ -289,7 +289,7 @@ class game:
         if self.hasLineScore():
             homeTeamRuns = self.teams['home'].getTotalRuns()
             awayTeamRuns = self.teams['away'].getTotalRuns()
-            sys.stdout.write("  %2d-%-2d" %( awayTeamRuns, homeTeamRuns ))
+            sys.stdout.write("    %2d-%-2d" %( awayTeamRuns, homeTeamRuns ))
         else:
             sys.stdout.write("     -    ")
 
