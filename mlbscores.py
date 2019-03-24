@@ -60,7 +60,7 @@ class pitcher(player):
             try:
                 self.stats[key] = keyType(jsonData[key])
             except:
-                continue
+                self.stats[key] = keyType(0)
 
     def loadSeasonStats(self, jsonData):
         seasonStatKeys = ['era']
@@ -69,7 +69,7 @@ class pitcher(player):
             try:
                 self.stats[key] = keyType(jsonData[key])
             except:
-                continue
+                self.stats[key] = keyType(0)
         
     def loadDerivedStats(self):
         self.setBoxName()
@@ -113,7 +113,7 @@ class batter(player):
             try:
                 self.stats[key] = keyType(jsonData[key])
             except:
-                continue
+                self.stats[key] = keyType(0)
 
     def loadSeasonStats(self, jsonData):
         seasonStatKeys = ['obp', 'slg']
@@ -122,7 +122,7 @@ class batter(player):
             try:
                 self.stats[key] = keyType(jsonData[key])
             except:
-                continue
+                self.stats[key] = keyType(0)
         
     def loadDerivedStats(self):
         self.setBoxName()
