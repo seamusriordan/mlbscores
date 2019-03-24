@@ -274,7 +274,7 @@ class game:
             self.printStatusReason()
 
     def printStatusPrefix(self):
-        sys.stdout.write( "  %-9s" %( self.gameStatus ))
+        sys.stdout.write( "  %-11s" %( self.gameStatus ))
 
     def printStatusReason(self):
         sys.stdout.write( "  (%s)" %(self.gameStatusReason))
@@ -289,7 +289,7 @@ class game:
         if self.hasLineScore():
             homeTeamRuns = self.teams['home'].getTotalRuns()
             awayTeamRuns = self.teams['away'].getTotalRuns()
-            sys.stdout.write("    %2d-%-2d" %( awayTeamRuns, homeTeamRuns ))
+            sys.stdout.write("  %2d-%-2d" %( awayTeamRuns, homeTeamRuns ))
         else:
             sys.stdout.write("     -    ")
 
