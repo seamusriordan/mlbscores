@@ -393,7 +393,7 @@ class game:
     def loadBoxScore(self):
         jsonData = self.loadBoxJSON()
         for side in ['home', 'away']:
-            self.teams[t].loadBoxScore(jsonData['teams'][side])
+            self.teams[side].loadBoxScore(jsonData['teams'][side])
         return
 
 
