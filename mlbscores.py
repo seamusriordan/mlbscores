@@ -613,8 +613,8 @@ class standings:
         self.divisionHeaderString = "%-24s    W    L       %%   GB WCGB   L10 Strk\n" 
         self.divisionFooterString = "\n" 
 
-        self.standingsHeaderString = "" 
-        self.standingsFooterString = "\n" 
+        self.standingsHeaderString = "\n" 
+        self.standingsFooterString = "" 
         
     def getRecordsFromURI(self, uri):
         standingsjson = ''
