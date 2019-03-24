@@ -274,7 +274,7 @@ class game:
             self.printStatusReason()
 
     def printStatusPrefix(self):
-        sys.stdout.write( "%-9s" %( self.gameStatus ))
+        sys.stdout.write( "  %-9s" %( self.gameStatus ))
 
     def printStatusReason(self):
         sys.stdout.write( "  (%s)" %(self.gameStatusReason))
