@@ -518,9 +518,10 @@ class gameDay:
         return gameData
     
     def hasTeam(self, aGame, teams):
-        homeBest =  any( aGame.teams['home'].nameAbbreviation == s for s in teams ) 
-        awayBest =  any( aGame.teams['away'].nameAbbreviation == s for s in teams ) 
-        return homeBest or awayBest
+        teamIsInGame = False
+        for side in ['home', 'away']:
+            teamIsInGame = teamIsInGame or any( aGame.teams[side].nameAbbreviation == s for s in teams ) 
+        return teamIsInGame
 
     
     def hasBestTeam(self, aGame):
