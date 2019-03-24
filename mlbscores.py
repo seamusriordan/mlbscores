@@ -300,14 +300,10 @@ class game:
         return isWaiting
 
     def isInProgress(self):
-        if self.gameStatus == 'In Progress':
-            return True
-        return False
+        return self.gameStatus == 'In Progress'
 
     def isPostponed(self):
-        if self.gameStatus == 'Postponed':
-            return True
-        return False
+        return self.gameStatus == 'Postponed'
 
     def printGameHeader(self):
         awayAbbrevName = self.teams['away'].nameAbbreviation
