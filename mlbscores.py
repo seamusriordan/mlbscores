@@ -392,8 +392,8 @@ class game:
 
     def loadBoxScore(self):
         jsonData = self.loadBoxJSON()
-        for t in ['home', 'away']:
-            self.teams[t].loadBoxScore(jsonData['teams'][t])
+        for side in ['home', 'away']:
+            self.teams[t].loadBoxScore(jsonData['teams'][side])
         return
 
 
@@ -412,20 +412,21 @@ class game:
         return runs
     
     def loadRunsForAllInnings(self, linescore):
-        for i in range(len(linescore)):
-            for t in ['home' ,'away']:
-                self.teams[t].runsByInning.append(self.loadRunsForAnInning(linescore, t, i))
+        nInnings = len(linescore)
+        for i in range(nInnings):
+            for side in ['home' ,'away']:
+                self.teams[side].runsByInning.append(self.loadRunsForAnInning(linescore, side, i))
 
     def loadHitsAndErrors(self, linescore):
-        for t in ['home' ,'away']:
+        for side in ['home' ,'away']:
             try:
-                self.teams[t].hits   = int(linescore['teams'][t]['hits'])
+                self.teams[side].hits   = int(linescore['teams'][side]['hits'])
             except:
-                self.teams[t].hits   = 0
+                self.teams[side].hits   = 0
             try:
-                self.teams[t].errors = int(linescore['teams'][t]['errors'])
+                self.teams[side].errors = int(linescore['teams'][side]['errors'])
             except:
-                self.teams[t].errors = 0
+                self.teams[side].errors = 0
 
     def extractGameTime(self, jsonData):
         try:
@@ -602,7 +603,7 @@ class standings:
           u'National League East',  u'National League Central', u'National League West']
         self.divisions = {}
 
-        #arrays for team data
+        #Set up some arrays in a dictionary for team data
         for k in self.divisionOrder:
             self.divisions[k] = []
         self.loadStandings()
@@ -726,7 +727,7 @@ def getExplicitTeams(passedTeams):
         explicitTeams = [x.upper() for x in passedTeams]
     return explicitTeams
 
-def configureParser():
+def configureArgParser():
     argparser = argparse.ArgumentParser(prog="mlbscores", description="MLB scores utility")
 
     #FIXME add in option for arbitrary day offset and specific dates?
@@ -744,7 +745,7 @@ def configureParser():
 def main(argv):
     global bestteams
 
-    args = configureParser().parse_args()
+    args = configureArgParser().parse_args()
 
     explicitTeams = getExplicitTeams(args.teams)
     
