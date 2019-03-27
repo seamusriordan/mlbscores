@@ -72,8 +72,9 @@ class gameDay:
         try:
             gameData = rawJSON["dates"][0]["games"]
         except:
-            sys.stdout.write("No games scheduled for " + self.scoreboardDate.strftime("%A %B %d, %Y") + "\n\n")
-            raise Exception("No games scheduled for " + self.scoreboardDate.strftime("%A %B %d, %Y") )
+            sys.stdout.write("\nNo games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") + "\n\n")
+            #raise Exception("No games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") )
+            gameData = {}
         return gameData
     
     def getRecordsFromURL(self, url):
@@ -105,12 +106,16 @@ class gameDay:
         return teamIsInGame
 
     def printGameDay(self, showBoxScore, teams = [] ):
-        self.printGameDayHeader()
-        
-        if len(teams) == 0:
-            self.printAllGames(showBoxScore)
-        else:
-            self.printCertainGames(teams, showBoxScore)
+        if self.getNumberOfGames() > 0:
+            self.printGameDayHeader()
+            
+            if len(teams) == 0:
+                self.printAllGames(showBoxScore)
+            else:
+                self.printCertainGames(teams, showBoxScore)
+
+    def getNumberOfGames(self):
+        return len(self.bestGames + self.games)
    
     def printGameDayHeader(self):
         sys.stdout.write("\nBaseball for " + self.gameDayDate.strftime("%A %B %d, %Y") + "\n\n")
