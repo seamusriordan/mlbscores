@@ -285,7 +285,7 @@ class game:
         sys.stdout.write( "  %-13s" %( self.gameStatus ))
 
     def printStatusReason(self):
-        sys.stdout.write( "  (%6s)" %(self.gameStatusReason))
+        sys.stdout.write( "  (%s)" %(self.gameStatusReason))
 
     def isInProgress(self):
         return self.gameStatus == 'In Progress'
