@@ -174,9 +174,12 @@ class game:
             self.inningState = ""
         self.teams['home'].loadJSON(jsonData['teams']['home'])
         self.teams['away'].loadJSON(jsonData['teams']['away'])
-        linescoreJSON = jsonData['linescore']
-        self.loadRunsForAllInnings(linescoreJSON['innings'])
-        self.loadHitsAndErrors(linescoreJSON)
+        try:
+            linescoreJSON = jsonData['linescore']
+            self.loadRunsForAllInnings(linescoreJSON['innings'])
+            self.loadHitsAndErrors(linescoreJSON)
+        except:
+            pass
 
     def extractGameTime(self, jsonData):
         try:
