@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-from prompt_toolkit.key_binding.bindings.named_commands import self_insert
 
 # mlb scores and standing utility
 #
@@ -172,14 +171,14 @@ class game:
             self.inningState = jsonData['linescore']['inningState'][:3]
         except:
             self.inningState = ""
-        self.teams['home'].unpackJSON(jsonData['teams']['home'])
-        self.teams['away'].unpackJSON(jsonData['teams']['away'])
+        self.teams['home'].loadJSON(jsonData['teams']['home'])
+        self.teams['away'].loadJSON(jsonData['teams']['away'])
         try:
             linescoreJSON = jsonData['linescore']
             self.loadRunsForAllInnings(linescoreJSON['innings'])
             self.loadHitsAndErrors(linescoreJSON)
         except:
-            self.loadRunsForAllInnings({})
+            pass
 
     def extractGameTime(self, jsonData):
         try:
@@ -285,7 +284,7 @@ class game:
         sys.stdout.write( "  %-13s" %( self.gameStatus ))
 
     def printStatusReason(self):
-        sys.stdout.write( "  (%6s)" %(self.gameStatusReason))
+        sys.stdout.write( "  (%s)" %(self.gameStatusReason))
 
     def isInProgress(self):
         return self.gameStatus == 'In Progress'
