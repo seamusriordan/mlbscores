@@ -171,8 +171,8 @@ class game:
             self.inningState = jsonData['linescore']['inningState'][:3]
         except:
             self.inningState = ""
-        self.teams['home'].loadJSON(jsonData['teams']['home'])
-        self.teams['away'].loadJSON(jsonData['teams']['away'])
+        self.teams['home'].unpackJSON(jsonData['teams']['home'])
+        self.teams['away'].unpackJSON(jsonData['teams']['away'])
         try:
             linescoreJSON = jsonData['linescore']
             self.loadRunsForAllInnings(linescoreJSON['innings'])
