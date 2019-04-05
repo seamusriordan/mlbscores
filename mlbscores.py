@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from prompt_toolkit.key_binding.bindings.named_commands import self_insert
 
 # mlb scores and standing utility
 #
@@ -66,9 +67,7 @@ class gameDay:
 
 
     def tryToGetJSON(self):
-        scoreboard_url = base_scoreboard_url %\
-             (self.gameDayDate.year, self.gameDayDate.month, self.gameDayDate.day)
-        rawJSON = self.getRecordsFromURL(scoreboard_url)
+        rawJSON = self.getRecordsFromURL()
         try:
             gameData = rawJSON["dates"][0]["games"]
         except:
@@ -77,20 +76,21 @@ class gameDay:
             gameData = {}
         return gameData
     
-    def getRecordsFromURL(self, url):
-        try:
-            if USE_CERTIFI:
-                scoreboardJSON = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET',url)
-            else:
-                scoreboardJSON = urllib3.PoolManager().request('GET',url)
-        except:
-            raise URIException("Could not load game day data")
-        JSONToReturn = json.loads(scoreboardJSON.data)
-        return JSONToReturn
+
+    def getRecordsFromURL(self):
+        scoreboard_url = self.formScoreBoardURL()
+        loader = JSONloader(scoreboard_url)
+        JSONtoReturn = loader.loadJSON()
+        return JSONtoReturn
+
+    def formScoreBoardURL(self):
+        return base_scoreboard_url %\
+             (self.gameDayDate.year, self.gameDayDate.month, self.gameDayDate.day)
+    
 
     def fillGameData(self, gameJSON):
         aGame = game()
-        aGame.loadJSON(gameJSON)
+        aGame.unpackJSON(gameJSON)
         if self.hasBestTeam(aGame):
             self.bestGames.append(aGame)
         else:
@@ -150,7 +150,7 @@ class game:
         self.currentInningOrdinal= ""
         self.teams = {'home': gameTeam(), 'away': gameTeam()}
         
-    def loadJSON(self, jsonData):
+    def unpackJSON(self, jsonData):
         self.gamePk = jsonData["gamePk"]
         self.gameStatus = jsonData["status"]["detailedState"]
         try:
@@ -172,11 +172,14 @@ class game:
             self.inningState = jsonData['linescore']['inningState'][:3]
         except:
             self.inningState = ""
-        self.teams['home'].loadJSON(jsonData['teams']['home'])
-        self.teams['away'].loadJSON(jsonData['teams']['away'])
-        linescoreJSON = jsonData['linescore']
-        self.loadRunsForAllInnings(linescoreJSON['innings'])
-        self.loadHitsAndErrors(linescoreJSON)
+        self.teams['home'].unpackJSON(jsonData['teams']['home'])
+        self.teams['away'].unpackJSON(jsonData['teams']['away'])
+        try:
+            linescoreJSON = jsonData['linescore']
+            self.loadRunsForAllInnings(linescoreJSON['innings'])
+            self.loadHitsAndErrors(linescoreJSON)
+        except:
+            self.loadRunsForAllInnings({})
 
     def extractGameTime(self, jsonData):
         try:
@@ -221,16 +224,16 @@ class game:
         return
  
     def loadBoxJSON(self):
-        boxscore_url = base_boxscore_url % self.gamePk
-        if USE_CERTIFI:
-            boxjsondata = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET', boxscore_url)
-        else:
-            boxjsondata = urllib3.PoolManager().request('GET', boxscore_url)
-        try:
-            boxscore= json.loads(boxjsondata.data)
-        except:
+        boxscore_url = self.formBoxScoreURL()
+        loader = JSONloader(boxscore_url)
+        jsondata = loader.loadJSON()
+        if len(jsondata.keys()) == 0:
             sys.stdout.write("   No box score data available                \n")
-        return boxscore
+        return jsondata
+    
+    def formBoxScoreURL(self):
+        return base_boxscore_url % self.gamePk
+        
 
     def printGameSummary(self):
         self.printGameHeader()
@@ -361,7 +364,7 @@ class gameTeam:
             'batters' : "   %-20s %3d %3d %3d %3d %3d %3d\n\n", \
             'pitchers': "   %-20s      %3d %2d %2d %2d %2d %2d\n\n"}
 
-    def loadJSON(self, jsonData):
+    def unpackJSON(self, jsonData):
         self.nameAbbreviation = jsonData['team']["abbreviation"]
         self.name = jsonData['team']["name"]
         try:
@@ -722,6 +725,21 @@ class seasonTeam:
                          self.last10wins, self.last10losses, self.streakCode )
         return standingTuple
 
+class JSONloader():
+    def __init__(self, uri):
+        self.uri = uri
+
+    def loadJSON(self):
+        if USE_CERTIFI:
+            jsondata = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where()).request('GET', self.uri)
+        else:
+            jsondata = urllib3.PoolManager().request('GET', self.uri)
+        try:
+            readdata = json.loads(jsondata.data)
+        except:
+            raise URIException("Could not load ", self.uri)
+            readdata = {}
+        return readdata
 
 
 class URIException( BaseException ):
