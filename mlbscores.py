@@ -1,15 +1,7 @@
 #!/usr/bin/python3
 
 # mlb scores and standing utility
-#
-# Seamus Riordan
-# seamus@riordan.io
-# March 23, 2019
-# 
-# Reads publicly available JSON data from mlb.com and prints out
-# up to date scores, reduced box score, or standings
-# Self contained script
-
+ 
 USE_CERTIFI = True
 
 import json
@@ -373,7 +365,7 @@ class gameTeam:
             self.probablePitcher.lastName = "TBD"
 
         try:
-            self.probablePitcher.stats['era'] = str(pitcherJSON['stats'][1]['stats']['era'])
+            self.probablePitcher.stats['era'] = str(pitcherJSON['stats'][3]['stats']['era'])
         except:
             self.probablePitcher.stats['era'] = "-"
         
