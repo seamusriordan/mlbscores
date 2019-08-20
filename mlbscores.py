@@ -333,7 +333,7 @@ class gameTeam:
         self.players = {'batters': [], 'pitchers': []}
         self.boxStatKeys = {
             'batters': ['plateAppearances', 'hits', 'baseOnBalls', \
-                       'runs', 'homeRuns', 'strikeOuts', 'obp', 'ops'],  \
+                       'runs', 'homeRuns', 'strikeOuts', 'avg', 'obp', 'ops'],  \
             'pitchers': ['inningsPitched','pitchesThrown',  'strikeOuts',\
                           'hits', 'baseOnBalls', 'runs', 'homeRuns', 'era']}
 
@@ -344,11 +344,11 @@ class gameTeam:
                           'hits', 'baseOnBalls', 'runs', 'homeRuns']}
         
         self.boxScoreHeaderFormatString = { \
-            'batters':  "   %-20s  PA   H  BB   R  HR  SO    OBP    OPS\n", \
+            'batters':  "   %-20s  PA   H  BB   R  HR  SO   AVG     OBP    OPS\n", \
             'pitchers': "   %-20s   IP  PC SO  H BB  R HR   ERA\n"}
 
         self.boxScoreFormatString = {\
-            'batters':  "%-23s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f\n", \
+            'batters':  "%-23s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f  %5.3f\n", \
             'pitchers': "   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n"  }
 
         self.boxScoreFooterFormatString = { \
@@ -517,7 +517,7 @@ class batter(player):
                              "runs" :0, "homeRuns": 0, "strikeOuts": 0, \
                              "hitByPitch" :0, "sacFlies":0, "sacBunts":0, \
                              "plateAppearances": 0,\
-                              "obp": 0.0, "slg": 0.0, "ops": 0.0}
+                              "avg": 0.0, "obp": 0.0, "slg": 0.0, "ops": 0.0}
         self.position = ""
 
     def loadStats(self, json):
@@ -538,7 +538,7 @@ class batter(player):
                 self.stats[key] = keyType(0)
 
     def loadSeasonStats(self, jsonData):
-        seasonStatKeys = ['obp', 'slg']
+        seasonStatKeys = ['avg', 'obp', 'slg']
         seasonStatType = [float, float]
         for key, keyType in zip(seasonStatKeys, seasonStatType):
             try:
