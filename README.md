@@ -19,14 +19,14 @@ positional arguments:
 
 optional arguments:
 
-  -h, --help  show this help message and exit
-  -b          Show boxscore output for best games
-  -c          Choose team to feature in schedule and save to file
-  -f          Show full output for all games
-  -s          Show current standings
-  -y          Show for yesterday
-  -t          Show for tomorrow
-  -tt         Show for two days from now
+      -h, --help  show this help message and exit
+      -b          Show boxscore output for best games
+      -c          Choose team to feature in schedule and save to file
+      -f          Show full output for all games
+      -s          Show current standings
+      -y          Show for yesterday
+      -t          Show for tomorrow
+      -tt         Show for two days from now
 
 ## Customization ##
 
