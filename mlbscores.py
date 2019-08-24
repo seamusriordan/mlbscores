@@ -1,24 +1,31 @@
 #!/usr/bin/python3
 
 # mlb scores and standing utility
- 
+
+import argparse
+import datetime
+from datetime import timezone
+import json
+import sys
+import urllib3
+
+CONF_FILE = 'mlbscores.conf'
 USE_CERTIFI = True
 
-import json
-import urllib3
 try:
     import certifi
 except:
     USE_CERTIFI = False
     urllib3.disable_warnings()
 
-import datetime
-from datetime import timezone
-import sys
-import argparse
+# Read in favorite team from configuration file
+try:
+    with open(CONF_FILE, 'r') as t:
+            bestteams = [line.rstrip() for line in t.readlines()]
+            t.close()
+except FileNotFoundError:
+    bestteams = ['CHC']
 
-# FIXME - read in from file
-bestteams = ["CHC"]
 # Switch from previous scores to today's scores at 10AM
 daytime_rollover = 10 
 
@@ -748,6 +755,7 @@ def configureArgParser():
 
     #FIXME add in option for arbitrary day offset and specific dates?
     argparser.add_argument("-b",  action="store_true",  dest="boxscore",  help="Show boxscore output for best games")
+    argparser.add_argument("-c",  action="store_true",  dest="bestteams", help="Choose team to feature in schedule and save to file")
     argparser.add_argument("-f",  action="store_true",  dest="full",      help="Show full output for all games")
     argparser.add_argument("-s",  action="store_true",  dest="standings", help="Show current standings")
     argparser.add_argument("teams", help="Show explicit teams only specified by space separated list of case insensitive abbreviated names  e.g. chc coL SF", nargs="*")
@@ -755,7 +763,7 @@ def configureArgParser():
     argtgroup.add_argument("-y",  action="store_const", dest="dayoffset", const=-1, help="Show for yesterday")
     argtgroup.add_argument("-t",  action="store_const", dest="dayoffset", const= 1, help="Show for tomorrow")
     argtgroup.add_argument("-tt", action="store_const", dest="dayoffset", const= 2, help="Show for two days from now")
-    
+
     return argparser
 
 def main(argv):
@@ -764,13 +772,25 @@ def main(argv):
     args = configureArgParser().parse_args()
 
     explicitTeams = getExplicitTeams(args.teams)
-    
+
     if args.standings:
         theseStandings = standings()
         theseStandings.printStandings()
+
+    elif args.bestteams:
+        print("Saving favorite team to file....")
+        thisGameDay = gameDay(args.dayoffset)
+        thisGameDay.printGameDay(args.boxscore, explicitTeams)
+
+        conf = open(CONF_FILE, 'w')
+        for i in explicitTeams:
+            conf.write(i)
+        conf.close()
+
     else:
         thisGameDay = gameDay(args.dayoffset)
         thisGameDay.printGameDay(args.boxscore, explicitTeams)
-    
+
+
 if __name__ == "__main__":
     main(sys.argv)

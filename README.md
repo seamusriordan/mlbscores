@@ -19,8 +19,9 @@ positional arguments:
 
 optional arguments:
 
-      -h, --help  Show this help message and exit
+      -h, --help  show this help message and exit
       -b          Show boxscore output for best games
+      -c          Choose team to feature in schedule and save to file
       -f          Show full output for all games
       -s          Show current standings
       -y          Show for yesterday
