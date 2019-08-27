@@ -6,6 +6,7 @@ import argparse
 import datetime
 from datetime import timezone
 import json
+import os
 import sys
 import urllib3
 
@@ -20,7 +21,7 @@ except:
 
 # Read in favorite team from configuration file
 try:
-    with open(CONF_FILE, 'r') as t:
+    with open(os.path.join(sys.path[0], CONF_FILE), 'r') as t:
             bestteams = [line.rstrip() for line in t.readlines()]
             t.close()
 except FileNotFoundError:
@@ -782,7 +783,7 @@ def main(argv):
         thisGameDay = gameDay(args.dayoffset)
         thisGameDay.printGameDay(args.boxscore, explicitTeams)
 
-        conf = open(CONF_FILE, 'w')
+        conf = open(os.path.join(sys.path[0], CONF_FILE), 'w')
         for i in explicitTeams:
             conf.write(i)
         conf.close()
