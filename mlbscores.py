@@ -588,7 +588,7 @@ class standings:
             self.divisions[k] = []
         self.loadStandings()
         
-        self.divisionHeaderString = "%-24s    W    L       %%   GB WCGB   L10 Strk\n" 
+        self.divisionHeaderString = "%-24s    W    L       %%   GB WCGB   L10   Strk\n"
         self.divisionFooterString = "\n" 
 
         self.standingsHeaderString = "\n" 
