@@ -712,7 +712,7 @@ class seasonTeam:
         self.wcgb = '-'
         self.winningPercentage = 0.0
 
-        self.standingFormatString = "%-24s %4d %4d   %5.3f %4s %4s %2d-%2d %4s\n"
+        self.standingFormatString = "%-24s %4d %4d   %5.3f %4s %4s %2d -%2d %4s\n"
         
     def printStanding(self):
 
