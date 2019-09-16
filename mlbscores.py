@@ -22,20 +22,21 @@ except:
 # Read in favorite team from configuration file
 try:
     with open(os.path.join(sys.path[0], CONF_FILE), 'r') as t:
-            bestteams = [line.rstrip() for line in t.readlines()]
-            t.close()
+        bestteams = [line.rstrip() for line in t.readlines()]
+        t.close()
 except FileNotFoundError:
     bestteams = ['CHC']
 
 # Switch from previous scores to today's scores at 10AM
-daytime_rollover = 10 
+daytime_rollover = 10
 
 base_scoreboard_url = "https://statsapi.mlb.com/api/v1/schedule?sportId=1,51&date=%04d-%02d-%02d&leagueId=103,104,420&hydrate=team,linescore(matchup,runners),flags,person,probablePitcher,stats,game(summary)&useLatestGames=false&language=en"
 base_boxscore_url   = "http://statsapi.mlb.com/api/v1/game/%s/boxscore"
 base_standings_uri  = "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%4s&standingsTypes=regularSeason,springTraining&hydrate=division,conference,league"
 
+
 class gameDay:
-    def __init__(self, dayOffset = 0):
+    def __init__(self, dayOffset=0):
         self.games = []
         self.bestGames = []
         self.gameDayDate = datetime.datetime.now()
@@ -51,10 +52,10 @@ class gameDay:
 
     def setScoreboardDate(self, offset):
         now = datetime.datetime.now()
-        rolledOverDate    = self.modifyDateForRollover(now)
+        rolledOverDate = self.modifyDateForRollover(now)
         dateForScoreboard = self.modifyDateForOffset(rolledOverDate, offset)
         self.gameDayDate = dateForScoreboard
-        
+
     def modifyDateForRollover(self, date):
         rolledOverDate = date
         if date.hour < daytime_rollover:
@@ -64,17 +65,15 @@ class gameDay:
     def modifyDateForOffset(self, date, offset):
         return date + datetime.timedelta(1)*offset
 
-
     def tryToGetJSON(self):
         rawJSON = self.getRecordsFromURL()
         try:
             gameData = rawJSON["dates"][0]["games"]
         except:
             sys.stdout.write("\nNo games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") + "\n\n")
-            #raise Exception("No games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") )
+            # raise Exception("No games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") )
             gameData = {}
         return gameData
-    
 
     def getRecordsFromURL(self):
         scoreboard_url = self.formScoreBoardURL()
@@ -85,7 +84,6 @@ class gameDay:
     def formScoreBoardURL(self):
         return base_scoreboard_url %\
              (self.gameDayDate.year, self.gameDayDate.month, self.gameDayDate.day)
-    
 
     def fillGameData(self, gameJSON):
         aGame = game()
@@ -101,13 +99,13 @@ class gameDay:
     def hasTeam(self, aGame, teams):
         teamIsInGame = False
         for side in ['home', 'away']:
-            teamIsInGame = teamIsInGame or any( aGame.teams[side].nameAbbreviation == s for s in teams ) 
+            teamIsInGame = teamIsInGame or any(aGame.teams[side].nameAbbreviation == s for s in teams)
         return teamIsInGame
 
-    def printGameDay(self, showBoxScore, teams = [] ):
+    def printGameDay(self, showBoxScore, teams=[]):
         if self.getNumberOfGames() > 0:
             self.printGameDayHeader()
-            
+
             if len(teams) == 0:
                 self.printAllGames(showBoxScore)
             else:
@@ -115,11 +113,11 @@ class gameDay:
 
     def getNumberOfGames(self):
         return len(self.bestGames + self.games)
-   
+
     def printGameDayHeader(self):
         sys.stdout.write("\nBaseball for " + self.gameDayDate.strftime("%A %B %d, %Y") + "\n\n")
         return
-    
+
     def printAllGames(self, showBoxScore):
         for aGame in self.bestGames:
             aGame.printGameSummary()
@@ -137,7 +135,7 @@ class gameDay:
                 if showBoxScore:
                     aGame.printBoxScore()
 
-    
+
 class game:
     def __init__(self):
         self.gamePk = 0
@@ -146,16 +144,16 @@ class game:
         self.gameStatusReason = ""
         self.inningState = ""
         self.innings = 0
-        self.currentInningOrdinal= ""
+        self.currentInningOrdinal = ""
         self.teams = {'home': gameTeam(), 'away': gameTeam()}
-        
+
     def unpackJSON(self, jsonData):
         self.gamePk = jsonData["gamePk"]
         self.gameStatus = jsonData["status"]["detailedState"]
         try:
-            self.gameStatusReason  = jsonData['status']['reason']
+            self.gameStatusReason = jsonData['status']['reason']
         except:
-            self.gameStatusReason  = ""
+            self.gameStatusReason = ""
         try:
             self.currentInningOrdinal = jsonData['linescore']['currentInningOrdinal']
         except:
@@ -167,7 +165,7 @@ class game:
         except:
             self.innings = 0
 
-        try: 
+        try:
             self.inningState = jsonData['linescore']['inningState'][:3]
         except:
             self.inningState = ""
@@ -186,7 +184,7 @@ class game:
             #  Example "2019-03-03T18:05:00Z"
             gtime = datetime.datetime.strptime(jsonData["gameDate"], "%Y-%m-%dT%H:%M:%SZ")
             # Convert to local time zone
-            gtime = gtime.replace(tzinfo= timezone.utc).astimezone(tz=None)
+            gtime = gtime.replace(tzinfo=timezone.utc).astimezone(tz=None)
             timeString = gtime.strftime("%H:%M %Z")
         except:
             timeString = "Good thing time does not exist"
@@ -195,7 +193,7 @@ class game:
     def loadRunsForAllInnings(self, linescore):
         nInnings = len(linescore)
         for i in range(nInnings):
-            for side in ['home' ,'away']:
+            for side in ['home', 'away']:
                 self.teams[side].runsByInning.append(self.loadRunsForAnInning(linescore, side, i))
 
     def loadRunsForAnInning(self, linescore, teamKey, inning):
@@ -206,11 +204,11 @@ class game:
         return runs
 
     def loadHitsAndErrors(self, linescore):
-        for side in ['home' ,'away']:
+        for side in ['home', 'away']:
             try:
-                self.teams[side].hits   = int(linescore['teams'][side]['hits'])
+                self.teams[side].hits = int(linescore['teams'][side]['hits'])
             except:
-                self.teams[side].hits   = 0
+                self.teams[side].hits = 0
             try:
                 self.teams[side].errors = int(linescore['teams'][side]['errors'])
             except:
@@ -221,7 +219,7 @@ class game:
         for side in ['home', 'away']:
             self.teams[side].loadBoxScore(jsonData['teams'][side])
         return
- 
+
     def loadBoxJSON(self):
         boxscore_url = self.formBoxScoreURL()
         loader = JSONloader(boxscore_url)
@@ -229,10 +227,9 @@ class game:
         if len(jsondata.keys()) == 0:
             sys.stdout.write("   No box score data available                \n")
         return jsondata
-    
+
     def formBoxScoreURL(self):
         return base_boxscore_url % self.gamePk
-        
 
     def printGameSummary(self):
         self.printGameHeader()
@@ -247,7 +244,6 @@ class game:
         homeAbbrevName = self.teams['home'].nameAbbreviation
         sys.stdout.write("%-3s @ %-3s   " % (awayAbbrevName, homeAbbrevName))
 
-    
     def isWaitingToStart(self):
         waitingToStartKeys = ["Preview", "Pre-Game", "Scheduled"]
         isWaiting = False
@@ -272,8 +268,7 @@ class game:
         self.printScore()
 
     def printProgress(self):
-        sys.stdout.write( "  %3s %-9s" %( self.inningState, self.currentInningOrdinal ))
-        
+        sys.stdout.write("  %3s %-9s" % (self.inningState, self.currentInningOrdinal)) 
 
     def printStatus(self):
         self.printStatusPrefix()
@@ -281,10 +276,10 @@ class game:
             self.printStatusReason()
 
     def printStatusPrefix(self):
-        sys.stdout.write( "  %-13s" %( self.gameStatus ))
+        sys.stdout.write("  %-13s" % (self.gameStatus))
 
     def printStatusReason(self):
-        sys.stdout.write( "  (%s)" %(self.gameStatusReason))
+        sys.stdout.write("  (%s)" % (self.gameStatusReason))
 
     def isInProgress(self):
         return self.gameStatus == 'In Progress'
@@ -296,23 +291,23 @@ class game:
         if self.hasLineScore():
             homeTeamRuns = self.teams['home'].getTotalRuns()
             awayTeamRuns = self.teams['away'].getTotalRuns()
-            sys.stdout.write("%2d-%-2d" %( awayTeamRuns, homeTeamRuns ))
+            sys.stdout.write("%2d-%-2d" % (awayTeamRuns, homeTeamRuns))
         else:
             sys.stdout.write("     -    ")
 
     def hasLineScore(self):
-        return len(self.teams['away'].runsByInning)>0
+        return len(self.teams['away'].runsByInning) > 0
 
     def printGameDetails(self):
         self.printLineScore()
-            
+
     def printLineScore(self):
         inningsToPrint = max(9, self.innings)
         self.printLineScoreHeader(inningsToPrint)
         self.teams['away'].printLineScore(inningsToPrint)
         self.teams['home'].printLineScore(inningsToPrint)
         self.printLineScoreFooter()
-        
+
     def printLineScoreHeader(self, inningsToPrint):
         sys.stdout.write("    ")
         for i in range(inningsToPrint):
@@ -341,23 +336,23 @@ class gameTeam:
         self.players = {'batters': [], 'pitchers': []}
         self.boxStatKeys = {
             'batters': ['plateAppearances', 'hits', 'baseOnBalls', \
-                       'runs', 'homeRuns', 'strikeOuts', 'avg', 'obp', 'ops'],  \
-            'pitchers': ['inningsPitched','pitchesThrown',  'strikeOuts',\
-                          'hits', 'baseOnBalls', 'runs', 'homeRuns', 'era']}
+                        'runs', 'homeRuns', 'strikeOuts', 'avg', 'obp', 'ops'],  \
+            'pitchers': ['inningsPitched', 'pitchesThrown', 'strikeOuts',\
+                         'hits', 'baseOnBalls', 'runs', 'homeRuns', 'era']}
 
         self.boxSumStatKeys = {
             'batters': ['plateAppearances', 'hits', 'baseOnBalls', \
-                       'runs', 'homeRuns', 'strikeOuts'],  \
+                        'runs', 'homeRuns', 'strikeOuts'],  \
             'pitchers': ['pitchesThrown', 'strikeOuts',\
-                          'hits', 'baseOnBalls', 'runs', 'homeRuns']}
-        
+                         'hits', 'baseOnBalls', 'runs', 'homeRuns']}
+
         self.boxScoreHeaderFormatString = { \
             'batters':  "   %-20s  PA   H  BB   R  HR  SO   AVG     OBP    OPS\n", \
             'pitchers': "   %-20s   IP  PC SO  H BB  R HR   ERA\n"}
 
         self.boxScoreFormatString = {\
             'batters':  "%-23s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f  %5.3f\n", \
-            'pitchers': "   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n"  }
+            'pitchers': "   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n"}
 
         self.boxScoreFooterFormatString = { \
             'batters' : "   %-20s %3d %3d %3d %3d %3d %3d\n\n", \
@@ -376,11 +371,11 @@ class gameTeam:
             self.probablePitcher.stats['era'] = str(pitcherJSON['stats'][3]['stats']['era'])
         except:
             self.probablePitcher.stats['era'] = "-"
-        
+
     def loadBoxScore(self, jsonData):
         self.loadBatterBoxes(jsonData)
         self.loadPitcherBoxes(jsonData)
-    
+
     def loadBatterBoxes(self, jsonData):
         for playerID in jsonData['batters']:
             playerJSON = jsonData['players']["ID"+str(playerID)]
@@ -401,37 +396,37 @@ class gameTeam:
         newPitcher.loadStats(playerJSON)
         self.players['pitchers'].append(newPitcher)
 
-
     def getTotalStat(self, playerSetKey, statKey):
         statsByPlayers = [aPlayer.stats[statKey] for aPlayer in self.players[playerSetKey]]
-        return sum(statsByPlayers) 
+        return sum(statsByPlayers)
 
     def printInningRunsWithData(self):
-        inningsWithData    = self.getLineScoreLength()
+        inningsWithData = self.getLineScoreLength()
         for i in range(inningsWithData):
             sys.stdout.write("%2d " % self.runsByInning[i])
-    
+
     def getLineScoreLength(self):
         return len(self.runsByInning)
 
     def printLineScore(self, nInningsToPrint):
-        sys.stdout.write("%-4s" %  self.nameAbbreviation )
+        sys.stdout.write("%-4s" % self.nameAbbreviation)
         self.printInningRuns(nInningsToPrint)
         self.printHRE()
 
     def printInningRuns(self, nInningsToPrint):
         inningsWithoutData = nInningsToPrint - self.getLineScoreLength()
         self.printInningRunsWithData()
-        self.printNBlankInnings(nBlanks = inningsWithoutData)
+        self.printNBlankInnings(nBlanks=inningsWithoutData)
 
     def printHRE(self):
         sys.stdout.write("| %2d %2d %2d\n" % \
-            (self.getTotalHits(), self.getTotalRuns(), self.getTotalErrors()))
- 
+                         (self.getTotalHits(), self.getTotalRuns(), \
+                          self.getTotalErrors()))
+
     def printNBlankInnings(self, nBlanks):
         for i in range(nBlanks):
             sys.stdout.write("   ")
-    
+
     def printBoxScore(self, playerSet):
         self.printBoxScoreHeader(playerSet)
         self.printBoxScoreForAll(playerSet)
@@ -449,16 +444,16 @@ class gameTeam:
         boxScoreTuple = (aPlayer.boxName, )
         boxScoreTuple += self.getBoxScoreStats(aPlayer, self.boxStatKeys[playerSet])
         return boxScoreTuple
-    
+
     def getBoxScoreStats(self, aPlayer, keys):
         statmap = [aPlayer.stats[k] for k in keys]
         return tuple(statmap)
 
     def printBoxScoreFooter(self, playerSet):
         boxSumTuple = ("TOTAL", ) + self.formBoxScoreSumTuple(playerSet)
-        sys.stdout.write(self.boxScoreFooterFormatString[playerSet] % boxSumTuple )
+        sys.stdout.write(self.boxScoreFooterFormatString[playerSet] % boxSumTuple)
 
-    def formBoxScoreSumTuple(self, playerSet ):
+    def formBoxScoreSumTuple(self, playerSet):
         statmap = [self.getTotalStat(playerSet, k) for k in self.boxSumStatKeys[playerSet]]
         return tuple(statmap)
 
@@ -471,20 +466,22 @@ class gameTeam:
     def getTotalErrors(self):
         return self.errors
 
+
 class player:
     def __init__(self):
         self.firstName = ""
         self.lastName = "TBD"
         self.fullName = "TBD"
-        self.boxName  = "TBD"
+        self.boxName = "TBD"
         self.PID = 0
+
 
 class pitcher(player):
     def __init__(self):
         super(pitcher, self).__init__()
-        self.stats = {"pitchesThrown":0, "inningsPitched":0, "strikeOuts":0,\
-                           "hits":0, "baseOnBalls":0, "runs":0, "homeRuns":0, \
-                            "era": 0.0}
+        self.stats = {"pitchesThrown": 0, "inningsPitched": 0, \
+                      "strikeOuts": 0, "hits": 0, "baseOnBalls": 0, \
+                      "runs": 0, "homeRuns": 0, "era": 0.0}
 
     def loadStats(self, json):
         self.fullName = json['person']['fullName']
@@ -494,7 +491,7 @@ class pitcher(player):
 
     def loadGameStats(self, jsonData):
         gameStatKeys = ['pitchesThrown', 'inningsPitched', 'strikeOuts',\
-                           'hits', 'baseOnBalls', 'runs', 'homeRuns']
+                        'hits', 'baseOnBalls', 'runs', 'homeRuns']
         gameStatType = [int, float, int, int, int, int, int]
         for key, keyType in zip(gameStatKeys, gameStatType):
             try:
@@ -510,22 +507,22 @@ class pitcher(player):
                 self.stats[key] = keyType(jsonData[key])
             except:
                 self.stats[key] = keyType(0)
-        
+
     def loadDerivedStats(self):
         self.setBoxName()
 
     def setBoxName(self):
         self.boxName = self.fullName[:23]
-        
+
 
 class batter(player):
     def __init__(self):
         super(batter, self).__init__()
-        self.stats = {"atBats":0, "hits":0, "baseOnBalls":0, \
-                             "runs" :0, "homeRuns": 0, "strikeOuts": 0, \
-                             "hitByPitch" :0, "sacFlies":0, "sacBunts":0, \
-                             "plateAppearances": 0,\
-                              "avg": 0.0, "obp": 0.0, "slg": 0.0, "ops": 0.0}
+        self.stats = {"atBats": 0, "hits": 0, "baseOnBalls": 0, \
+                      "runs": 0, "homeRuns": 0, "strikeOuts": 0, \
+                      "hitByPitch": 0, "sacFlies": 0, "sacBunts": 0, \
+                      "plateAppearances": 0,\
+                      "avg": 0.0, "obp": 0.0, "slg": 0.0, "ops": 0.0}
         self.position = ""
 
     def loadStats(self, json):
@@ -537,7 +534,7 @@ class batter(player):
 
     def loadGameStats(self, jsonData):
         gameStatKeys = ["atBats", "hits", "baseOnBalls", "runs", "homeRuns",\
-                         "strikeOuts", "hitByPitch", "sacFlies", "sacBunts"]
+                        "strikeOuts", "hitByPitch", "sacFlies", "sacBunts"]
         gameStatType = [int, int, int, int, int, int, int, int, int]
         for key, keyType in zip(gameStatKeys, gameStatType):
             try:
@@ -553,7 +550,7 @@ class batter(player):
                 self.stats[key] = keyType(jsonData[key])
             except:
                 self.stats[key] = keyType(0)
-        
+
     def loadDerivedStats(self):
         self.setBoxName()
         self.setOPS()
@@ -561,13 +558,13 @@ class batter(player):
 
     def setBoxName(self):
         self.boxName = self.getPositionNameString()[:23]
-        
+
     def setOPS(self):
         self.stats['ops'] = self.stats['obp'] + self.stats['slg']
 
     def setPlateAppearances(self):
         plateAppearanceKeys = ['atBats', 'baseOnBalls', 'hitByPitch',\
-                                'sacFlies', 'sacBunts']
+                               'sacFlies', 'sacBunts']
         totalPlateAppearances = sum([self.stats[k] for k in plateAppearanceKeys])
         self.stats['plateAppearances'] = totalPlateAppearances
 
@@ -575,7 +572,6 @@ class batter(player):
         return "%2s %s" % (self.position, self.fullName)
 
 
-    
 class standings:
     def __init__(self):
         self.divisionOrder = \
@@ -583,23 +579,21 @@ class standings:
           u'National League East',  u'National League Central', u'National League West']
         self.divisions = {}
 
-        #Set up some arrays in a dictionary for team data
+        # Set up some arrays in a dictionary for team data
         for k in self.divisionOrder:
             self.divisions[k] = []
         self.loadStandings()
-        
-        self.divisionHeaderString = "%-24s    W    L       %%   GB WCGB   L10 Strk\n" 
-        self.divisionFooterString = "\n" 
+        self.divisionHeaderString = "%-24s    W    L       %%   GB WCGB   L10   Strk\n"
+        self.divisionFooterString = "\n"
+        self.standingsHeaderString = "\n"
+        self.standingsFooterString = ""
 
-        self.standingsHeaderString = "\n" 
-        self.standingsFooterString = "" 
-        
     def loadStandings(self):
         jsonData = self.tryToGetJSON()
         for divData in jsonData:
             self.loadDivisionData(divData)
-        return 
-        
+        return
+
     def tryToGetJSON(self):
         now = datetime.datetime.now()
         standings_uri = base_standings_uri % (now.strftime("%Y"))
@@ -620,23 +614,23 @@ class standings:
         divisionKey = divisionData['division']['name']
         if divisionData['standingsType'] == "regularSeason":
             for teamJSONData in divisionData["teamRecords"]:
-                aTeam = self.loadTeamData(teamJSONData) 
+                aTeam = self.loadTeamData(teamJSONData)
                 self.divisions[divisionKey].append(aTeam)
 
     def loadTeamData(self, teamData):
         thisTeam = seasonTeam()
         try:
-            thisTeam.name         = teamData['team']['name']
+            thisTeam.name = teamData['team']['name']
         except:
-            thisTeam.name         = 'fail'
+            thisTeam.name = 'fail'
 
         try:
-            thisTeam.wins         = int(teamData['wins'])
+            thisTeam.wins = int(teamData['wins'])
         except:
-            thisTeam.wins  = 0
+            thisTeam.wins = 0
 
         try:
-            thisTeam.losses       = int(teamData['losses'])
+            thisTeam.losses = int(teamData['losses'])
         except:
             thisTeam.losses = 0
 
@@ -651,9 +645,9 @@ class standings:
             thisTeam.wcgb = '-'
 
         try:
-            thisTeam.last10wins   = int(teamData['records']['splitRecords'][4]['wins'])
+            thisTeam.last10wins = int(teamData['records']['splitRecords'][4]['wins'])
         except:
-            thisTeam.last10wins   = 0
+            thisTeam.last10wins = 0
 
         try:
             thisTeam.last10losses = int(teamData['records']['splitRecords'][4]['losses'])
@@ -686,7 +680,7 @@ class standings:
         for team in self.divisions[divisionKey]:
             team.printStanding()
         self.printDivisionFooter()
-    
+
     def printDivisionHeader(self, divisionKey):
         sys.stdout.write(self.divisionHeaderString % divisionKey)
 
@@ -695,10 +689,8 @@ class standings:
 
     def printStandingsFooter(self):
         sys.stdout.write(self.standingsFooterString)
-   
-    
-    
-        
+
+
 class seasonTeam:
     def __init__(self):
         self.name = ""
@@ -711,18 +703,18 @@ class seasonTeam:
         self.gb = '-'
         self.wcgb = '-'
         self.winningPercentage = 0.0
+        self.standingFormatString = "%-24s %4d %4d   %5.3f %4s %4s %2d -%2d %4s\n"
 
-        self.standingFormatString = "%-24s %4d %4d   %5.3f %4s %4s %2d-%2d %4s\n"
-        
     def printStanding(self):
-
         standingVals = self.formStandingTuple()
         sys.stdout.write(self.standingFormatString % standingVals)
+
     def formStandingTuple(self):
-        standingTuple = (self.name,  self.wins, self.losses,  self.winningPercentage, \
-                         self.gb, self.wcgb,\
-                         self.last10wins, self.last10losses, self.streakCode )
+        standingTuple = (self.name, self.wins, self.losses, \
+                         self.winningPercentage, self.gb, self.wcgb,\
+                         self.last10wins, self.last10losses, self.streakCode)
         return standingTuple
+
 
 class JSONloader():
     def __init__(self, uri):
@@ -741,20 +733,22 @@ class JSONloader():
         return readdata
 
 
-class URIException( BaseException ):
+class URIException(BaseException):
     def __init__(self, value):
         self.value = value
-        
+
+
 def getExplicitTeams(passedTeams):
     explicitTeams = []
     if len(passedTeams) > 0:
         explicitTeams = [x.upper() for x in passedTeams]
     return explicitTeams
 
+
 def configureArgParser():
     argparser = argparse.ArgumentParser(prog="mlbscores", description="MLB scores utility")
 
-    #FIXME add in option for arbitrary day offset and specific dates?
+    # FIXME add in option for arbitrary day offset and specific dates?
     argparser.add_argument("-b",  action="store_true",  dest="boxscore",  help="Show boxscore output for best games")
     argparser.add_argument("-c",  action="store_true",  dest="bestteams", help="Choose team to feature in schedule and save to file")
     argparser.add_argument("-f",  action="store_true",  dest="full",      help="Show full output for all games")
@@ -762,10 +756,11 @@ def configureArgParser():
     argparser.add_argument("teams", help="Show explicit teams only specified by space separated list of case insensitive abbreviated names  e.g. chc coL SF", nargs="*")
     argtgroup = argparser.add_mutually_exclusive_group()
     argtgroup.add_argument("-y",  action="store_const", dest="dayoffset", const=-1, help="Show for yesterday")
-    argtgroup.add_argument("-t",  action="store_const", dest="dayoffset", const= 1, help="Show for tomorrow")
-    argtgroup.add_argument("-tt", action="store_const", dest="dayoffset", const= 2, help="Show for two days from now")
+    argtgroup.add_argument("-t",  action="store_const", dest="dayoffset", const=1, help="Show for tomorrow")
+    argtgroup.add_argument("-tt", action="store_const", dest="dayoffset", const=2, help="Show for two days from now")
 
     return argparser
+
 
 def main(argv):
     global bestteams
