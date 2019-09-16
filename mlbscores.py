@@ -71,7 +71,7 @@ class gameDay:
             gameData = rawJSON["dates"][0]["games"]
         except:
             sys.stdout.write("\nNo games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") + "\n\n")
-            #raise Exception("No games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") )
+            # raise Exception("No games scheduled for " + self.gameDayDate.strftime("%A %B %d, %Y") )
             gameData = {}
         return gameData
 
@@ -307,7 +307,7 @@ class game:
         self.teams['away'].printLineScore(inningsToPrint)
         self.teams['home'].printLineScore(inningsToPrint)
         self.printLineScoreFooter()
- 
+
     def printLineScoreHeader(self, inningsToPrint):
         sys.stdout.write("    ")
         for i in range(inningsToPrint):
@@ -352,7 +352,7 @@ class gameTeam:
 
         self.boxScoreFormatString = {\
             'batters':  "%-23s %3d %3d %3d %3d %3d %3d  %5.3f  %5.3f  %5.3f\n", \
-            'pitchers': "   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n"  }
+            'pitchers': "   %-20s %4.1f %3d %2d %2d %2d %2d %2d %5.2f\n"}
 
         self.boxScoreFooterFormatString = { \
             'batters' : "   %-20s %3d %3d %3d %3d %3d %3d\n\n", \
@@ -420,7 +420,8 @@ class gameTeam:
 
     def printHRE(self):
         sys.stdout.write("| %2d %2d %2d\n" % \
-            (self.getTotalHits(), self.getTotalRuns(), self.getTotalErrors()))
+                         (self.getTotalHits(), self.getTotalRuns(), \
+                          self.getTotalErrors()))
 
     def printNBlankInnings(self, nBlanks):
         for i in range(nBlanks):
@@ -478,9 +479,9 @@ class player:
 class pitcher(player):
     def __init__(self):
         super(pitcher, self).__init__()
-        self.stats = {"pitchesThrown": 0, "inningsPitched": 0, "strikeOuts": 0,\
-                      "hits": 0, "baseOnBalls": 0, "runs": 0, "homeRuns": 0, \
-                      "era": 0.0}
+        self.stats = {"pitchesThrown": 0, "inningsPitched": 0, \
+                      "strikeOuts": 0, "hits": 0, "baseOnBalls": 0, \
+                      "runs": 0, "homeRuns": 0, "era": 0.0}
 
     def loadStats(self, json):
         self.fullName = json['person']['fullName']
@@ -709,8 +710,8 @@ class seasonTeam:
         sys.stdout.write(self.standingFormatString % standingVals)
 
     def formStandingTuple(self):
-        standingTuple = (self.name, self.wins, self.losses, self.winningPercentage, \
-                         self.gb, self.wcgb,\
+        standingTuple = (self.name, self.wins, self.losses, \
+                         self.winningPercentage, self.gb, self.wcgb,\
                          self.last10wins, self.last10losses, self.streakCode)
         return standingTuple
 
